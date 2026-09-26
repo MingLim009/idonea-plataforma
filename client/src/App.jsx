@@ -101,37 +101,65 @@ function Login({ onEnter }) {
 
   return (
     <div className="login">
-      <form className="panel" onSubmit={submit}>
-        <div className="brand-row">
-          <LogoMark size={40} />
-          <h1>idônea</h1>
-        </div>
-        <h2 style={{ fontWeight: 600, fontSize: 20, marginBottom: 4 }}>
-          {mode === "conta" ? "Criar conta" : "Entrar"}
-        </h2>
-        <p className="muted">Gestão de projetos, horas e vendas em uma única plataforma.</p>
-        <div style={{ height: 16 }} />
-        {error && <div className="alert">{error}</div>}
-        {mode === "conta" && (
-          <label className="field">Nome<input value={name} onChange={(e) => setName(e.target.value)} required /></label>
-        )}
-        <label className="field">E-mail<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required /></label>
-        <label className="field">Senha<input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required /></label>
-        <button className="primary" type="submit">{mode === "conta" ? "Criar conta" : "Entrar"}</button>
-        <div className="row" style={{ marginTop: 14 }}>
-          <button type="button" className="ghost" onClick={() => onEnter("carolina@idonea.com", "demo123")}>Carolina</button>
-          <button type="button" className="ghost" onClick={() => onEnter("marcelo@idonea.com", "demo123")}>Marcelo</button>
-          <button type="button" className="ghost" onClick={() => onEnter("ana@idonea.com", "demo123")}>Ana</button>
-        </div>
-        <p className="muted" style={{ marginTop: 12 }}>Demonstração · senha demo123</p>
-        <button type="button" className="textish" style={{ marginTop: 8 }} onClick={() => setMode(mode === "conta" ? "login" : "conta")}>
-          {mode === "conta" ? "Já tenho conta" : "Criar uma conta"}
-        </button>
-      </form>
+      <div className="login-main">
+        <form className="login-form" onSubmit={submit}>
+          <div className="login-brand">
+            <LogoMark size={32} />
+            <span className="login-brand-name">idônea</span>
+          </div>
+          <h1 className="login-title">{mode === "conta" ? "Criar conta" : "Entrar"}</h1>
+          <p className="login-lead">Gestão de projetos, horas e vendas em uma única plataforma.</p>
+          {error && <div className="alert">{error}</div>}
+          {mode === "conta" && (
+            <label className="field">Nome<input value={name} onChange={(e) => setName(e.target.value)} required /></label>
+          )}
+          <label className="field">E-mail<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="Digite seu e-mail" /></label>
+          <label className="field">Senha<input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="Digite sua senha" /></label>
+          <button className="login-submit" type="submit">{mode === "conta" ? "Criar conta" : "Entrar"}</button>
+          <div className="login-demos">
+            <button type="button" className="ghost" onClick={() => onEnter("carolina@idonea.com", "demo123")}>Carolina</button>
+            <button type="button" className="ghost" onClick={() => onEnter("marcelo@idonea.com", "demo123")}>Marcelo</button>
+            <button type="button" className="ghost" onClick={() => onEnter("ana@idonea.com", "demo123")}>Ana</button>
+          </div>
+          <p className="login-hint">Demonstração · senha demo123</p>
+          <button type="button" className="login-switch" onClick={() => setMode(mode === "conta" ? "login" : "conta")}>
+            {mode === "conta" ? "Já tenho conta" : "Criar uma conta"}
+          </button>
+        </form>
+      </div>
       <aside className="login-side" aria-hidden="true">
-        <div className="login-side-card">
-          <strong>Horas apontadas</strong>
-          <b>49:32</b>
+        <div className="login-preview">
+          <div className="login-preview-rail">
+            <span style={{ background: "#00bebe" }} />
+            <span style={{ background: "#5dade2" }} />
+            <span style={{ background: "#f1c40f" }} />
+            <span style={{ background: "#e74c3c" }} />
+            <span style={{ background: "#9b59b6" }} />
+            <span style={{ background: "#8229f9" }} />
+          </div>
+          <div className="login-preview-body">
+            <div className="login-preview-top">
+              <strong>Analytics</strong>
+              <span>Esta semana</span>
+            </div>
+            <div className="login-preview-stat">
+              <span>Horas apontadas</span>
+              <b>49:32</b>
+            </div>
+            <div className="login-preview-bars">
+              <span style={{ height: "42%" }} />
+              <span style={{ height: "68%" }} />
+              <span style={{ height: "54%" }} />
+              <span style={{ height: "86%" }} />
+              <span style={{ height: "61%" }} />
+              <span style={{ height: "74%" }} />
+            </div>
+            <div className="login-preview-list">
+              <div><i className="dot-mark" /><span>Campanha primavera</span><small>Em andamento</small></div>
+              <div><i className="dot-mark" /><span>Site institucional</span><small>3 atrasadas</small></div>
+              <div><i className="dot-mark" /><span>Clínica Vale</span><small>No prazo</small></div>
+            </div>
+          </div>
         </div>
       </aside>
     </div>
