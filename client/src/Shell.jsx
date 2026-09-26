@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "./api.js";
+import { LogoMark } from "./LogoMark.jsx";
 
 const ICONS = {
   inicio: "fi-rr-home",
@@ -61,9 +62,7 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            <i className="fi fi-rr-apps" />
-          </span>
+          <LogoMark size={36} />
           <div>
             <strong>idônea</strong>
             <span>Projetos e vendas</span>

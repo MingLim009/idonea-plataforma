@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, clearToken, getToken, setToken } from "./api.js";
 import { Shell } from "./Shell.jsx";
+import { LogoMark } from "./LogoMark.jsx";
 import { AiView, CrmView, Dashboard, ImportView, ProjectView, TeamView, TimeView } from "./views.jsx";
 import { TaskDrawer } from "./TaskDrawer.jsx";
 
@@ -102,9 +103,7 @@ function Login({ onEnter }) {
     <div className="login">
       <form className="panel" onSubmit={submit}>
         <div className="brand-row">
-          <span className="brand-mark" aria-hidden="true">
-            <i className="fi fi-rr-apps" />
-          </span>
+          <LogoMark size={40} />
           <h1>idônea</h1>
         </div>
         <h2 style={{ fontFamily: "Lexend, sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 4 }}>
