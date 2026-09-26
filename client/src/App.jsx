@@ -106,7 +106,7 @@ function Login({ onEnter }) {
           <LogoMark size={40} />
           <h1>idônea</h1>
         </div>
-        <h2 style={{ fontFamily: "Lexend, sans-serif", fontWeight: 600, fontSize: 20, marginBottom: 4 }}>
+        <h2 style={{ fontWeight: 600, fontSize: 20, marginBottom: 4 }}>
           {mode === "conta" ? "Criar conta" : "Entrar"}
         </h2>
         <p className="muted">Gestão de projetos, horas e vendas em uma única plataforma.</p>
