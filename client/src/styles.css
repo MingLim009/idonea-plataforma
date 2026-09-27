@@ -25,7 +25,7 @@
   --shadow-card: 0 1px 2px rgba(46, 57, 80, 0.06);
   --radius: 6px;
   --radius-pill: 50px;
-  --font: Barlow, sans-serif;
+  --font: Lexend, sans-serif;
   --font-btn: Lexend, sans-serif;
   font-family: var(--font);
   font-style: normal;
@@ -38,7 +38,7 @@ html, body {
   margin: 0;
   background: #ffffff;
   min-height: 100vh;
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
@@ -47,7 +47,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 button, input, select, textarea {
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-size: inherit;
   color: inherit;
@@ -55,12 +55,14 @@ button, input, select, textarea {
 button { cursor: pointer; }
 h1, h2, h3, p { margin: 0; }
 h1, h2, h3 {
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-weight: 700;
   letter-spacing: normal;
-  color: #2e3950;
+  color: #1c2b33;
 }
+.page-head h1 { color: #1c2b33; }
+.muted, .page-head .muted { color: #4a5568; }
 
 .app { height: 100vh; display: flex; overflow: hidden; background: #ffffff; }
 
@@ -97,7 +99,7 @@ h1, h2, h3 {
 .brand-mark svg, .brand-mark img { width: 100%; height: 100%; display: block; }
 .brand strong {
   display: block;
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-size: 20px;
   font-weight: 600;
@@ -110,7 +112,7 @@ h1, h2, h3 {
   color: #71768b;
   font-size: 12px;
   font-weight: 400;
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
 }
 .nav { display: flex; flex-direction: column; gap: 2px; width: 100%; align-items: stretch; }
@@ -124,7 +126,7 @@ h1, h2, h3 {
   flex-direction: row;
   align-items: center;
   gap: 10px;
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-size: 14px;
   font-weight: 500;
@@ -156,23 +158,23 @@ h1, h2, h3 {
 .sidebar .userbox > div { display: block; min-width: 0; }
 .sidebar .userbox strong {
   display: block; font-size: 13px; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sidebar .userbox small {
   display: block; color: #71768b; font-size: 12px;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .sidebar .userbox > .logout:last-child { display: none; }
 .sidebar .logout {
   background: transparent; color: #00bebe; padding: 0; margin-top: 2px;
   font-size: 12px; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .avatar, .dot {
   width: 32px; height: 32px; border-radius: 50%;
   display: grid; place-items: center; color: white; font-size: 12px; font-weight: 700; flex-shrink: 0;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 
 .main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #ffffff; }
@@ -183,7 +185,7 @@ h1, h2, h3 {
 .search { flex: 1; position: relative; max-width: 520px; }
 .search input, .field input, .field select, .field textarea, .composer input, .composer textarea {
   width: 100%; background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px;
-  color: #2e3950; font-family: Barlow, sans-serif; font-style: normal;
+  color: #2e3950; font-family: Lexend, sans-serif; font-style: normal;
 }
 .search input { padding-left: 38px; background: #f5f6f8; }
 .search-ico {
@@ -199,20 +201,20 @@ h1, h2, h3 {
 }
 .search .results button {
   display: block; width: 100%; text-align: left; background: #ffffff; border: 0; padding: 10px 12px;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .search .results button:hover { background: #e8f8f8; }
 .bell { position: relative; }
 .bell > button, .iconbtn {
   background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 9px 12px;
   display: inline-flex; align-items: center; gap: 8px; color: #2e3950;
-  font-family: Barlow, sans-serif; font-style: normal; font-weight: 500; font-size: 14px;
+  font-family: Lexend, sans-serif; font-style: normal; font-weight: 500; font-size: 14px;
 }
 .bell > button i, .iconbtn i { font-size: 16px; color: #71768b; }
 .badge {
   position: absolute; top: -6px; right: -6px; background: #f98f03; color: white;
   border-radius: 99px; font-size: 11px; min-width: 18px; text-align: center; padding: 1px 5px;
-  font-family: Barlow, sans-serif; font-style: normal; font-weight: 600;
+  font-family: Lexend, sans-serif; font-style: normal; font-weight: 600;
 }
 .dropdown {
   position: absolute; right: 0; top: 46px; width: 340px; background: #ffffff; border: 1px solid var(--line);
@@ -220,7 +222,7 @@ h1, h2, h3 {
 }
 .dropdown button.note {
   width: 100%; text-align: left; background: transparent; border: 0; padding: 10px; border-radius: 6px;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .dropdown button.note.unread { background: #e8f8f8; }
 
@@ -228,11 +230,11 @@ h1, h2, h3 {
 .page-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; margin-bottom: 20px; }
 .page-head h1 {
   font-size: 28px; font-weight: 700;
-  font-family: Barlow, sans-serif; font-style: normal; color: #2e3950;
+  font-family: Lexend, sans-serif; font-style: normal; color: #2e3950;
 }
 .page-head .muted {
   margin-top: 4px; font-size: 14px; color: #71768b;
-  font-family: Barlow, sans-serif; font-style: normal; font-weight: 400;
+  font-family: Lexend, sans-serif; font-style: normal; font-weight: 400;
 }
 .muted { color: #71768b; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -245,17 +247,17 @@ h1, h2, h3 {
 .stat, .panel { padding: 16px; }
 .stat span.muted {
   font-size: 13px; font-weight: 500;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .stat b {
   display: block; font-size: 28px; margin-top: 6px;
-  font-family: Barlow, sans-serif; font-style: normal; font-weight: 700; color: #2e3950;
+  font-family: Lexend, sans-serif; font-style: normal; font-weight: 700; color: #2e3950;
 }
 .split { display: grid; grid-template-columns: 1.4fr .8fr; gap: 14px; }
 .taskline, .plain {
   width: 100%; text-align: left; background: transparent; border: 0; padding: 10px 0;
   display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid #eef2f6;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .taskline:last-child, .plain:last-child { border-bottom: 0; }
 
@@ -268,16 +270,16 @@ h1, h2, h3 {
 .ghost {
   background: transparent; border: 1px solid var(--line); padding: 9px 14px;
   color: #71768b; font-weight: 500; border-radius: 50px;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .ghost.active, .ghost:hover { background: #ffffff; color: #2e3950; border-color: #00bebe; }
 .danger {
   background: transparent; color: #ff4d4d; padding: 8px 10px; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .textish {
   background: transparent; padding: 4px 0; color: #00bebe; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 
 .board {
@@ -291,13 +293,13 @@ h1, h2, h3 {
 .column header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 12px; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal; padding: 0 2px; font-size: 13px;
+  font-family: Lexend, sans-serif; font-style: normal; padding: 0 2px; font-size: 13px;
 }
 .column header .col-title { display: flex; align-items: center; gap: 8px; }
 .column header .count {
   background: #ffffff; color: #71768b; border-radius: 99px; font-size: 12px;
   min-width: 22px; text-align: center; padding: 2px 7px; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .col-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .tcard {
@@ -308,17 +310,17 @@ h1, h2, h3 {
 .handle { color: #b7c2ce; background: transparent; border: 0; padding: 0; cursor: grab; line-height: 1; }
 .tcard h3 {
   font-size: 14px; font-weight: 600; color: #2e3950;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .tcard .project-label {
   font-size: 12px; color: #71768b; margin-top: 2px;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
 .pill {
   font-size: 11px; border-radius: 4px; padding: 3px 8px; background: #eef3f7;
   color: #2e3950; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .pill.alta { background: #fff4e6; color: #b86700; }
 .pill.urgente { background: #ffecec; color: #c62828; }
@@ -333,7 +335,7 @@ h1, h2, h3 {
 .filters select {
   background: #ffffff; border: 1px solid var(--line); border-radius: 50px;
   padding: 8px 12px; color: #71768b; font-weight: 500;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .table {
   width: 100%; border-collapse: collapse; background: #ffffff;
@@ -342,21 +344,21 @@ h1, h2, h3 {
 .table th, .table td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
 .table th {
   color: #71768b; font-weight: 600; font-size: 12px;
-  font-family: Barlow, sans-serif; font-style: normal; background: #f5f6f8;
+  font-family: Lexend, sans-serif; font-style: normal; background: #f5f6f8;
 }
 .table button.link {
   background: none; border: 0; padding: 0; text-align: left; color: #00aec7; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .drawer-back { position: fixed; inset: 0; background: rgba(10, 25, 38, .28); z-index: 20; display: flex; justify-content: flex-end; }
 .drawer { width: min(480px, 100%); height: 100%; background: #ffffff; padding: 22px; overflow: auto; box-shadow: var(--shadow); }
 .drawer h2 input {
   font-size: 22px; font-weight: 700; border: 0; background: transparent; width: 100%; padding: 0;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .field {
   display: grid; gap: 6px; margin-bottom: 12px; font-size: 13px; font-weight: 600; color: #2e3950;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .field.inline { grid-template-columns: 1fr 1fr; gap: 10px; }
 .subtask { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
@@ -364,13 +366,13 @@ h1, h2, h3 {
 .timerbar {
   flex-shrink: 0; display: flex; justify-content: space-between; gap: 12px; align-items: center;
   background: #0a1926; color: white; padding: 12px 18px;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .timerbar .primary { background: #f98f03; border-radius: var(--radius); }
 .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
 .tabs button {
   background: transparent; border: 0; padding: 10px 14px; border-bottom: 3px solid transparent;
-  color: #71768b; font-family: Barlow, sans-serif; font-style: normal; font-weight: 500;
+  color: #71768b; font-family: Lexend, sans-serif; font-style: normal; font-weight: 500;
 }
 .tabs button.active { border-color: #8229f9; color: #8229f9; font-weight: 600; }
 .deal {
@@ -380,11 +382,11 @@ h1, h2, h3 {
 .deal:hover { border-color: #cde8ea; }
 .deal strong {
   display: block; font-size: 14px; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .score {
   font-size: 12px; color: #00aec7; font-weight: 600;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 
 .login {
@@ -392,7 +394,7 @@ h1, h2, h3 {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
   background: #ffffff;
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
 }
 .login-main {
@@ -410,7 +412,7 @@ h1, h2, h3 {
   margin-bottom: 28px;
 }
 .login-brand-name {
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 22px;
@@ -420,7 +422,7 @@ h1, h2, h3 {
   line-height: 1;
 }
 .login-title {
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 22px;
@@ -429,7 +431,7 @@ h1, h2, h3 {
   letter-spacing: normal;
 }
 .login-lead {
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: 15px;
@@ -489,7 +491,7 @@ h1, h2, h3 {
   border: 0;
   background: transparent;
   color: #00bebe;
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 14px;
@@ -546,7 +548,7 @@ h1, h2, h3 {
   gap: 8px;
 }
 .login-preview-top strong {
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-weight: 700;
   font-size: 16px;
@@ -568,7 +570,7 @@ h1, h2, h3 {
 .login-preview-stat b {
   display: block;
   margin-top: 4px;
-  font-family: Barlow, sans-serif;
+  font-family: Lexend, sans-serif;
   font-style: normal;
   font-weight: 700;
   font-size: 28px;
@@ -632,11 +634,11 @@ h1, h2, h3 {
 
 .alert {
   background: #ffecec; color: #9b1c1c; padding: 10px 12px; border-radius: 6px; margin-bottom: 10px;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .ok {
   background: #e9f7ee; color: #145c38; padding: 10px 12px; border-radius: 6px; margin: 8px 0;
-  font-family: Barlow, sans-serif; font-style: normal;
+  font-family: Lexend, sans-serif; font-style: normal;
 }
 .people { display: flex; }
 .people .dot { margin-left: -6px; border: 2px solid #ffffff; width: 24px; height: 24px; font-size: 10px; }
@@ -645,7 +647,7 @@ h1, h2, h3 {
 .check { display: flex; gap: 8px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .panel h2 {
   font-size: 16px; margin-bottom: 10px;
-  font-family: Barlow, sans-serif; font-style: normal; font-weight: 700;
+  font-family: Lexend, sans-serif; font-style: normal; font-weight: 700;
 }
 .ico { width: 18px; height: 18px; display: inline-block; vertical-align: middle; }
 
