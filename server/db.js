@@ -6,12 +6,10 @@ import { randomUUID } from "crypto";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = process.env.VERCEL
-  ? path.join("/tmp", "idonea-data")
-  : path.join(__dirname, "data");
-const uploadDir = process.env.VERCEL
-  ? path.join("/tmp", "idonea-uploads")
-  : path.join(__dirname, "uploads");
+const dataDir = process.env.DATA_DIR
+  || (process.env.VERCEL ? path.join("/tmp", "idonea-data") : path.join(__dirname, "data"));
+const uploadDir = process.env.UPLOAD_DIR
+  || (process.env.VERCEL ? path.join("/tmp", "idonea-uploads") : path.join(__dirname, "uploads"));
 fs.mkdirSync(dataDir, { recursive: true });
 fs.mkdirSync(uploadDir, { recursive: true });
 

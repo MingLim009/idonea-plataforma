@@ -1,0 +1,32 @@
+# Hostinger KVM 2 / VPS — Phase 1 (Asana + hours + import)
+# Persistent /data so login and history survive restarts (unlike Vercel /tmp).
+
+services:
+  idonea:
+    build: .
+    container_name: idonea-asana
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: "4000"
+      DATA_DIR: /data
+      UPLOAD_DIR: /data/uploads
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-on-vps}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - idonea_data:/data
+
+  # Optional reverse proxy — map host 80 → app
+  # Uncomment after pointing domain DNS to the VPS.
+  # nginx:
+  #   image: nginx:1.27-alpine
+  #   depends_on: [idonea]
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  #   restart: unless-stopped
+
+volumes:
+  idonea_data:
