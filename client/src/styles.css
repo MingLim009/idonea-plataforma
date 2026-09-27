@@ -1,7 +1,8 @@
 :root {
   /* Artia.com exact palette */
   --bg: #ffffff;
-  --bg-soft: #f5f6f8;
+  --bg-soft: #060a11;
+  --bg-glow: rgba(0, 190, 190, 0.16);
   --paper: #ffffff;
   --ink: #2e3950;
   --muted: #71768b;
@@ -177,17 +178,18 @@ h1, h2, h3 {
   font-family: Lexend, sans-serif; font-style: normal;
 }
 
-.main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #ffffff; }
+.main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #060a11; }
 .topbar {
   height: 64px; display: flex; align-items: center; gap: 16px;
-  padding: 0 24px; border-bottom: 1px solid var(--line); background: #ffffff;
+  padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.08); background: #0a1219;
 }
 .search { flex: 1; position: relative; max-width: 520px; }
 .search input, .field input, .field select, .field textarea, .composer input, .composer textarea {
   width: 100%; background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px;
   color: #2e3950; font-family: Lexend, sans-serif; font-style: normal;
 }
-.search input { padding-left: 38px; background: #f5f6f8; }
+.search input { padding-left: 38px; background: #121a24; border-color: rgba(255,255,255,0.12); color: #e8eef4; }
+.search input::placeholder { color: #8fa0b3; }
 .search-ico {
   position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
   font-size: 14px; color: #71768b; pointer-events: none;
@@ -206,11 +208,11 @@ h1, h2, h3 {
 .search .results button:hover { background: #e8f8f8; }
 .bell { position: relative; }
 .bell > button, .iconbtn {
-  background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 9px 12px;
-  display: inline-flex; align-items: center; gap: 8px; color: #2e3950;
+  background: #121a24; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius); padding: 9px 12px;
+  display: inline-flex; align-items: center; gap: 8px; color: #e8eef4;
   font-family: Lexend, sans-serif; font-style: normal; font-weight: 500; font-size: 14px;
 }
-.bell > button i, .iconbtn i { font-size: 16px; color: #71768b; }
+.bell > button i, .iconbtn i { font-size: 16px; color: #8fa0b3; }
 .badge {
   position: absolute; top: -6px; right: -6px; background: #f98f03; color: white;
   border-radius: 99px; font-size: 11px; min-width: 18px; text-align: center; padding: 1px 5px;
@@ -226,16 +228,23 @@ h1, h2, h3 {
 }
 .dropdown button.note.unread { background: #e8f8f8; }
 
-.content { padding: 24px; flex: 1; overflow: auto; background: #f5f6f8; }
+.content {
+  padding: 24px; flex: 1; overflow: auto;
+  background:
+    radial-gradient(ellipse 70% 50% at 0% 0%, var(--bg-glow), transparent 55%),
+    #060a11;
+}
 .page-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; margin-bottom: 20px; }
 .page-head h1 {
   font-size: 28px; font-weight: 700;
-  font-family: Lexend, sans-serif; font-style: normal; color: #2e3950;
+  font-family: Lexend, sans-serif; font-style: normal; color: #ffffff;
 }
 .page-head .muted {
-  margin-top: 4px; font-size: 14px; color: #71768b;
+  margin-top: 4px; font-size: 14px; color: #a8b3c4;
   font-family: Lexend, sans-serif; font-style: normal; font-weight: 400;
 }
+h1, h2, h3 { color: #1c2b33; }
+.page-head h1 { color: #ffffff; }
 .muted { color: #71768b; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .grid { display: grid; gap: 14px; }
@@ -287,9 +296,11 @@ h1, h2, h3 {
   background: transparent; min-height: 420px;
 }
 .column {
-  width: 292px; flex-shrink: 0; background: #eef3f7; border-radius: 8px; padding: 10px;
+  width: 292px; flex-shrink: 0; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px;
   min-height: 180px;
 }
+.column header { color: #e8eef4; }
+.column header .count { background: rgba(255,255,255,0.12); color: #c5d0dc; }
 .column header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 12px; font-weight: 600;
@@ -344,7 +355,7 @@ h1, h2, h3 {
 .table th, .table td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
 .table th {
   color: #71768b; font-weight: 600; font-size: 12px;
-  font-family: Lexend, sans-serif; font-style: normal; background: #f5f6f8;
+  font-family: Lexend, sans-serif; font-style: normal; background: #f0f2f5;
 }
 .table button.link {
   background: none; border: 0; padding: 0; text-align: left; color: #00aec7; font-weight: 600;
@@ -556,7 +567,7 @@ h1, h2, h3 {
 }
 .login-preview-top span { font-size: 12px; color: #71768b; }
 .login-preview-stat {
-  background: #f5f6f8;
+  background: #121a24;
   border: 1px solid #e2eaf1;
   border-radius: 8px;
   padding: 12px 14px;
@@ -667,3 +678,20 @@ h1, h2, h3 {
   .login { grid-template-columns: 1fr; }
   .login-side { display: none; }
 }
+
+.content .ghost {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
+  color: #c5d0dc;
+}
+.content .ghost:hover, .content .ghost.active {
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+  border-color: #00bebe;
+}
+.content .filters select {
+  background: #121a24;
+  border-color: rgba(255,255,255,0.14);
+  color: #c5d0dc;
+}
+.search-ico { color: #8fa0b3 !important; }
