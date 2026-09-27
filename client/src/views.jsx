@@ -682,57 +682,168 @@ export function ImportView() {
   );
 }
 
+const COMMAND_EXAMPLES = [
+  { label: "Criar tarefa", text: "criar tarefa Revisar proposta no projeto Site institucional para Ana até amanhã prioridade alta" },
+  { label: "Resumo do projeto", text: "resumo do projeto Site institucional" },
+  { label: "Tarefas em risco", text: "tarefas em risco" },
+  { label: "Concluir tarefa", text: "concluir tarefa Configurar domínio e SSL" },
+  { label: "Registrar horas", text: "registrar 1,5 horas na tarefa Redigir página Sobre" },
+];
+
 export function AiView({ gptKey, onOpenProject }) {
-  const [text, setText] = useState("criar tarefa Revisar proposta no projeto Site institucional para Ana até amanhã prioridade alta");
+  const [text, setText] = useState(COMMAND_EXAMPLES[0].text);
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const [projects, setProjects] = useState([]);
   const [summary, setSummary] = useState("");
+  const [summaryBusy, setSummaryBusy] = useState(false);
   const [projectId, setProjectId] = useState("");
 
-  useEffect(() => { api("/api/projects").then((rows) => { setProjects(rows); setProjectId(rows[0]?.id || ""); }); }, []);
+  useEffect(() => {
+    api("/api/projects").then((rows) => {
+      setProjects(rows);
+      setProjectId(rows[0]?.id || "");
+    });
+  }, []);
 
   async function send(value) {
+    const command = (value || text).trim();
+    if (!command) return;
     setError("");
+    setBusy(true);
     try {
-      const result = await api("/api/ai/command", { method: "POST", body: { text: value || text } });
+      const result = await api("/api/ai/command", { method: "POST", body: { text: command } });
       setAnswer(result.message);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setBusy(false);
     }
   }
 
+  async function generateSummary() {
+    if (!projectId) return;
+    setSummaryBusy(true);
+    setError("");
+    try {
+      const data = await api(`/api/ai/summary?project_id=${projectId}`);
+      setSummary(data.text);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSummaryBusy(false);
+    }
+  }
+
+  const selectedProject = projects.find((p) => p.id === projectId);
+
   return (
-    <div>
-      <div className="page-head"><div><h1>Comandos</h1><p className="muted">Crie tarefas, atualize status, comente e lance horas em texto. A mesma porta serve para o GPT.</p></div></div>
+    <div className="ai-page">
+      <div className="page-head">
+        <div>
+          <h1>Comandos</h1>
+          <p className="muted">Escreva em português o que precisa — criar tarefa, horas, status ou resumo. A mesma API serve para o GPT.</p>
+        </div>
+      </div>
+
       {error && <div className="alert">{error}</div>}
-      <section className="panel">
-        <textarea rows={3} value={text} onChange={(e) => setText(e.target.value)} />
-        <div className="row" style={{ marginTop: 8 }}>
-          <button className="primary" onClick={() => send()}>Enviar</button>
-          {["resumo do projeto Site institucional", "tarefas em risco", "concluir tarefa Configurar domínio e SSL", "registrar 1,5 horas na tarefa Redigir página Sobre"].map((example) => (
-            <button key={example} className="ghost" onClick={() => { setText(example); send(example); }}>{example}</button>
-          ))}
-        </div>
-        {answer && <p className="ok">{answer}</p>}
-      </section>
-      <section className="panel" style={{ marginTop: 12 }}>
-        <h2>Resumo de um projeto</h2>
-        <div className="row">
-          <select value={projectId} onChange={(e) => setProjectId(e.target.value)}>
-            {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
-          </select>
-          <button className="ghost" onClick={() => api(`/api/ai/summary?project_id=${projectId}`).then((data) => setSummary(data.text))}>Gerar resumo</button>
-          <button className="textish" onClick={() => onOpenProject(projectId)}>Abrir projeto</button>
-        </div>
-        {summary && <p style={{ marginTop: 8 }}>{summary}</p>}
-      </section>
-      <section className="panel" style={{ marginTop: 12 }}>
-        <h2>API para o GPT</h2>
-        <p>Envie POST para <b>/api/gpt</b> com o cabeçalho <b>X-Api-Key</b>.</p>
-        {gptKey ? <p>Chave: <b>{gptKey}</b></p> : <p className="muted">A chave aparece para administradores.</p>}
-        <p className="muted">Também aceita JSON direto: action create_task, update_task, add_comment, log_time, summarize ou risks.</p>
-      </section>
+
+      <div className="ai-layout">
+        <section className="ai-console panel">
+          <div className="ai-console-head">
+            <div>
+              <h2>Console de comandos</h2>
+              <p className="muted">Digite o pedido completo ou escolha um atalho abaixo.</p>
+            </div>
+          </div>
+
+          <div className="ai-chips" role="list">
+            {COMMAND_EXAMPLES.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                className={`ai-chip ${text === item.text ? "active" : ""}`}
+                onClick={() => setText(item.text)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          <label className="ai-composer">
+            <span className="ai-composer-label">Seu comando</span>
+            <textarea
+              rows={4}
+              value={text}
+              spellCheck={false}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  e.preventDefault();
+                  send();
+                }
+              }}
+              placeholder="Ex.: criar tarefa Revisar proposta no projeto Site institucional para Ana até amanhã"
+            />
+            <div className="ai-composer-foot">
+              <span className="muted">Ctrl + Enter para enviar</span>
+              <button className="primary" type="button" disabled={busy || !text.trim()} onClick={() => send()}>
+                {busy ? "Enviando…" : "Executar comando"}
+              </button>
+            </div>
+          </label>
+
+          {answer && (
+            <div className="ai-result">
+              <span className="ai-result-label">Resposta</span>
+              <p>{answer}</p>
+            </div>
+          )}
+        </section>
+
+        <aside className="ai-side">
+          <section className="panel ai-summary-card">
+            <h2>Resumo do projeto</h2>
+            <p className="muted">Gere um panorama rápido do andamento.</p>
+            <label className="field">
+              Projeto
+              <select value={projectId} onChange={(e) => { setProjectId(e.target.value); setSummary(""); }}>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>{project.name}</option>
+                ))}
+              </select>
+            </label>
+            <div className="ai-summary-actions">
+              <button className="primary" type="button" disabled={!projectId || summaryBusy} onClick={generateSummary}>
+                {summaryBusy ? "Gerando…" : "Gerar resumo"}
+              </button>
+              <button className="ghost" type="button" disabled={!projectId} onClick={() => onOpenProject(projectId)}>
+                Abrir projeto
+              </button>
+            </div>
+            {summary ? (
+              <div className="ai-summary-body">
+                <strong>{selectedProject?.name}</strong>
+                <p>{summary}</p>
+              </div>
+            ) : (
+              <p className="empty-state">O resumo aparece aqui depois de gerar.</p>
+            )}
+          </section>
+
+          <section className="panel ai-api-card">
+            <h2>API para o GPT</h2>
+            <p className="muted">Use a mesma lógica por HTTP a partir do ChatGPT ou automações.</p>
+            <div className="ai-code">
+              <div><span>POST</span> /api/gpt</div>
+              <div><span>Header</span> X-Api-Key</div>
+              {gptKey ? <div><span>Key</span> {gptKey}</div> : <div className="muted">Chave visível só para administradores.</div>}
+            </div>
+            <p className="muted ai-api-hint">Actions: create_task, update_task, add_comment, log_time, summarize, risks.</p>
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }
