@@ -6,32 +6,32 @@ import { api, formatDate, hoursLabel, money, priorityLabel, today } from "./api.
 export function Dashboard({ tick, onOpenProject, onOpenTask }) {
   const [data, setData] = useState(null);
   useEffect(() => { api("/api/dashboard").then(setData).catch(() => {}); }, [tick]);
-  if (!data) return <p>Carregando…</p>;
+  if (!data) return <p className="loading-line">Carregando o painel…</p>;
   return (
     <div>
       <div className="page-head">
         <div>
           <h1>Início</h1>
-          <p className="muted">O que pede atenção hoje.</p>
+          <p className="muted">Prioridades, horas e riscos do dia — tudo em um olhar.</p>
         </div>
       </div>
       <div className="grid stats">
         <div className="stat"><span className="muted">Atrasadas</span><b>{data.overdue}</b></div>
-        <div className="stat"><span className="muted">Minhas horas na semana</span><b>{hoursLabel(data.hoursWeek)}</b></div>
+        <div className="stat"><span className="muted">Horas na semana</span><b>{hoursLabel(data.hoursWeek)}</b></div>
         <div className="stat"><span className="muted">Negócios abertos</span><b>{money(data.openDeals.cents)}</b></div>
         <div className="stat"><span className="muted">Projetos</span><b>{data.projects.length}</b></div>
       </div>
       <div className="split">
         <section className="panel">
           <h2>Minhas tarefas</h2>
-          {data.myTasks.length === 0 && <p className="muted">Nada atribuído a você.</p>}
+          {data.myTasks.length === 0 && <p className="empty-state">Nada atribuído a você agora.</p>}
           {data.myTasks.map((task) => (
             <button key={task.id} className="taskline" onClick={() => onOpenTask(task.id)}>
               <span>{task.title}</span>
               <span className={task.due_date && task.due_date < today() ? "pill late" : "muted"}>{task.due_date ? formatDate(task.due_date) : task.project_name}</span>
             </button>
           ))}
-          <h2 style={{ marginTop: 18 }}>Projetos</h2>
+          <h2 style={{ marginTop: 22 }}>Projetos</h2>
           {data.projects.map((project) => (
             <button key={project.id} className="taskline" onClick={() => onOpenProject(project.id)}>
               <span><i className="dot" style={{ background: project.color, display: "inline-block", width: 10, height: 10, marginRight: 8 }} />{project.name}</span>
@@ -41,16 +41,17 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
         </section>
         <section className="panel">
           <h2>Risco de atraso</h2>
-          {data.risks.length === 0 && <p className="muted">Nenhuma tarefa em risco.</p>}
+          {data.risks.length === 0 && <p className="empty-state">Nenhuma tarefa em risco.</p>}
           {data.risks.map((task) => (
             <button key={task.id} className="taskline" onClick={() => onOpenTask(task.id)}>
               <span>{task.title}</span>
               <span className={`pill ${task.level === "alto" ? "urgente" : "alta"}`}>{task.level === "alto" ? "Alto" : "Médio"}</span>
             </button>
           ))}
-          <h2 style={{ marginTop: 18 }}>Atividade</h2>
+          <h2 style={{ marginTop: 22 }}>Atividade</h2>
+          {data.activity.length === 0 && <p className="empty-state">Sem atividade recente.</p>}
           {data.activity.map((item) => (
-            <p key={item.id} className="muted" style={{ marginTop: 8 }}>{item.detail}</p>
+            <p key={item.id} className="muted" style={{ marginTop: 10, lineHeight: 1.45 }}>{item.detail}</p>
           ))}
         </section>
       </div>

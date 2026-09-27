@@ -62,7 +62,7 @@ export default function App() {
     setPage("projeto");
   }
 
-  if (booting) return <div className="content">Carregando…</div>;
+  if (booting) return <div className="content"><p className="loading-line">Abrindo a Idônea…</p></div>;
   if (!user) return <Login onEnter={enter} />;
 
   return (
@@ -113,7 +113,7 @@ function Login({ onEnter }) {
             <span className="login-brand-name">idônea</span>
           </div>
           <h1 className="login-title">{mode === "conta" ? "Criar conta" : "Entrar"}</h1>
-          <p className="login-lead">Gestão de projetos, horas e vendas em uma única plataforma.</p>
+          <p className="login-lead">Projetos, horas e vendas — claros, conectados e prontos para a equipe.</p>
           {error && <div className="alert">{error}</div>}
           {mode === "conta" && (
             <label className="field">Nome<input value={name} onChange={(e) => setName(e.target.value)} required /></label>

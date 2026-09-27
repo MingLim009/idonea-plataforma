@@ -62,10 +62,10 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
-          <LogoMark size={36} />
+          <LogoMark size={38} />
           <div>
             <strong>idônea</strong>
-            <span>Projetos e vendas</span>
+            <span>Gestão em um só lugar</span>
           </div>
         </div>
         <nav className="nav">
@@ -96,7 +96,12 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
         <header className="topbar">
           <div className="search">
             <i className={`fi ${ICONS.search} search-ico`} />
-            <input placeholder="Pesquise" value={query} onChange={(e) => setQuery(e.target.value)} />
+            <input
+              placeholder="Buscar tarefas, projetos…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Buscar"
+            />
             {results.length > 0 && (
               <div className="results">
                 {results.map((task) => (
@@ -109,9 +114,9 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
             )}
           </div>
           <div className="bell">
-            <button onClick={() => setOpenNotes((value) => !value)}>
+            <button onClick={() => setOpenNotes((value) => !value)} aria-label="Avisos">
               <i className={`fi ${ICONS.bell}`} />
-              Avisos{unread > 0 ? ` (${unread})` : ""}
+              <span>Avisos</span>
             </button>
             {unread > 0 && <span className="badge">{unread}</span>}
             {openNotes && (
@@ -119,7 +124,7 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
                 <button className="textish" onClick={() => api("/api/notifications/read-all", { method: "POST" }).then(() => setNotes(notes.map((note) => ({ ...note, read: 1 }))))}>
                   Marcar como lidos
                 </button>
-                {notes.length === 0 && <p className="muted">Nenhum aviso.</p>}
+                {notes.length === 0 && <p className="empty-state">Nenhum aviso por agora.</p>}
                 {notes.map((note) => (
                   <button key={note.id} className={`note ${note.read ? "" : "unread"}`} onClick={() => {
                     api(`/api/notifications/${note.id}/read`, { method: "POST" });
@@ -138,9 +143,11 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
         <div className="content">{children}</div>
         {running && (
           <div className="timerbar">
-            <span>Contando em {running.title}</span>
+            <span>Timer · {running.title}</span>
             <strong>{formatClock(elapsed)}</strong>
-            <button className="primary" onClick={() => api("/api/time/stop", { method: "POST" }).then(() => setRunning(null))}>Parar e salvar</button>
+            <button className="primary" onClick={() => api("/api/time/stop", { method: "POST" }).then(() => setRunning(null))}>
+              Parar e salvar
+            </button>
           </div>
         )}
       </section>
