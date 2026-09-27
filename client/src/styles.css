@@ -1,19 +1,23 @@
 :root {
-  /* Artia.com exact palette */
-  --bg: #ffffff;
-  --bg-soft: #060a11;
-  --bg-glow: rgba(0, 190, 190, 0.16);
+  /* Artia dark teal → forest green */
+  --bg-deep: #051414;
+  --bg-mid: #0a2a22;
+  --bg-green: #0a5c40;
+  --bg-app: linear-gradient(125deg, #051414 0%, #0a2a22 42%, #0a5c40 100%);
+  --bg: #051414;
+  --bg-soft: #0a2a22;
+  --bg-glow: rgba(0, 190, 126, 0.22);
   --paper: #ffffff;
   --ink: #2e3950;
-  --muted: #71768b;
-  --line: #dde3eb;
+  --muted: #a8b3c4;
+  --line: rgba(255, 255, 255, 0.12);
   --teal: #00bebe;
   --teal-deep: #00aec7;
-  --teal-soft: #e8f8f8;
+  --teal-soft: rgba(0, 190, 190, 0.16);
   --orange: #f98f03;
   --orange-soft: #fff4e6;
   --purple: #8229f9;
-  --navy: #0a1926;
+  --navy: #051414;
   --good: #28a745;
   --good-soft: #e9f7ee;
   --warn: #ffc107;
@@ -22,8 +26,8 @@
   --bad-soft: #ffecec;
   --info: #007bff;
   --info-soft: #e8f1ff;
-  --shadow: 0 2px 12px rgba(46, 57, 80, 0.08);
-  --shadow-card: 0 1px 2px rgba(46, 57, 80, 0.06);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.12);
   --radius: 6px;
   --radius-pill: 50px;
   --font: Lexend, sans-serif;
@@ -31,13 +35,14 @@
   font-family: var(--font);
   font-style: normal;
   color: var(--ink);
-  background: var(--bg);
+  background: var(--bg-deep);
 }
 
 * { box-sizing: border-box; }
 html, body {
   margin: 0;
-  background: #ffffff;
+  background: var(--bg-app);
+  background-attachment: fixed;
   min-height: 100vh;
   font-family: Lexend, sans-serif;
   font-style: normal;
@@ -65,13 +70,17 @@ h1, h2, h3 {
 .page-head h1 { color: #1c2b33; }
 .muted, .page-head .muted { color: #4a5568; }
 
-.app { height: 100vh; display: flex; overflow: hidden; background: #ffffff; }
+.app {
+  height: 100vh; display: flex; overflow: hidden;
+  background: var(--bg-app);
+  background-attachment: fixed;
+}
 
 .sidebar {
   width: 220px;
-  background: #ffffff;
-  border-right: 1px solid var(--line);
-  color: var(--ink);
+  background: rgba(5, 20, 20, 0.72);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  color: #e8eef4;
   padding: 18px 12px;
   display: flex;
   flex-direction: column;
@@ -80,6 +89,7 @@ h1, h2, h3 {
   position: relative;
   z-index: 30;
   align-items: stretch;
+  backdrop-filter: blur(8px);
 }
 .brand {
   padding: 4px 8px 12px;
@@ -110,7 +120,7 @@ h1, h2, h3 {
 }
 .brand span {
   display: block;
-  color: #71768b;
+  color: #9eb0b8;
   font-size: 12px;
   font-weight: 400;
   font-family: Lexend, sans-serif;
@@ -120,7 +130,7 @@ h1, h2, h3 {
 .nav button, .ghost, .primary, .danger, .textish, .pill-btn { border: 0; }
 .nav button {
   background: transparent;
-  color: #71768b;
+  color: #c5d4da;
   text-align: left;
   padding: 10px 12px;
   display: flex;
@@ -138,23 +148,23 @@ h1, h2, h3 {
   width: 22px; height: 22px;
   display: grid; place-items: center;
   background: transparent;
-  color: #71768b;
+  color: #c5d4da;
   font-size: 16px;
   box-shadow: none !important;
 }
 .nav button .nav-ico i { line-height: 1; color: inherit; }
-.nav button[data-tone] .nav-ico { background: transparent; color: #71768b; }
+.nav button[data-tone] .nav-ico { background: transparent; color: #c5d4da; }
 .nav button.active, .nav button:hover {
-  background: #e8f8f8;
-  color: #00aec7;
+  background: rgba(0, 190, 190, 0.18);
+  color: #ffffff;
 }
 .nav button.active .nav-ico,
-.nav button:hover .nav-ico { color: #00aec7; }
+.nav button:hover .nav-ico { color: #00bebe; }
 .nav button.active { box-shadow: inset 3px 0 0 #00bebe; border-radius: 0 8px 8px 0; }
 .sidebar .userbox {
   margin-top: auto; padding: 12px 8px 4px;
   display: flex; flex-direction: row; gap: 10px; align-items: center;
-  border-top: 1px solid var(--line); width: 100%;
+  border-top: 1px solid rgba(255,255,255,0.1); width: 100%;
 }
 .sidebar .userbox > div { display: block; min-width: 0; }
 .sidebar .userbox strong {
@@ -163,9 +173,10 @@ h1, h2, h3 {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sidebar .userbox small {
-  display: block; color: #71768b; font-size: 12px;
+  display: block; color: #9eb0b8; font-size: 12px;
   font-family: Lexend, sans-serif; font-style: normal;
 }
+.sidebar .userbox strong { color: #ffffff; }
 .sidebar .userbox > .logout:last-child { display: none; }
 .sidebar .logout {
   background: transparent; color: #00bebe; padding: 0; margin-top: 2px;
@@ -178,10 +189,15 @@ h1, h2, h3 {
   font-family: Lexend, sans-serif; font-style: normal;
 }
 
-.main { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #060a11; }
+.main {
+  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
+  background: transparent;
+}
 .topbar {
   height: 64px; display: flex; align-items: center; gap: 16px;
-  padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.08); background: #0a1219;
+  padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: rgba(5, 20, 20, 0.55);
+  backdrop-filter: blur(8px);
 }
 .search { flex: 1; position: relative; max-width: 520px; }
 .search input, .field input, .field select, .field textarea, .composer input, .composer textarea {
@@ -230,9 +246,7 @@ h1, h2, h3 {
 
 .content {
   padding: 24px; flex: 1; overflow: auto;
-  background:
-    radial-gradient(ellipse 70% 50% at 0% 0%, var(--bg-glow), transparent 55%),
-    #060a11;
+  background: transparent;
 }
 .page-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; margin-bottom: 20px; }
 .page-head h1 {
@@ -404,7 +418,8 @@ h1, h2, h3 { color: #1c2b33; }
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
-  background: #ffffff;
+  background: var(--bg-app);
+  background-attachment: fixed;
   font-family: Lexend, sans-serif;
   font-style: normal;
 }
@@ -413,9 +428,15 @@ h1, h2, h3 { color: #1c2b33; }
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  background: #ffffff;
+  background: transparent;
 }
-.login-form { width: min(400px, 100%); }
+.login-form {
+  background: rgba(255,255,255,0.96);
+  border-radius: 12px;
+  padding: 32px 28px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+}
+.login-form { width: min(400px, 100%); box-sizing: border-box; }
 .login-brand {
   display: flex;
   align-items: center;
@@ -510,7 +531,7 @@ h1, h2, h3 { color: #1c2b33; }
   cursor: pointer;
 }
 .login-side {
-  background: #00bebe;
+  background: transparent;
   position: relative;
   overflow: hidden;
   display: flex;
