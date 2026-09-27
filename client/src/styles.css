@@ -192,15 +192,27 @@ h1, h2, h3 {
 }
 .sidebar .userbox > .logout:last-child { display: none; }
 .sidebar .logout {
-  background: transparent;
-  color: #00bebe;
-  padding: 0;
-  margin-top: 4px;
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 5px 12px;
+  border: 1px solid rgba(0, 190, 190, 0.35);
+  border-radius: var(--radius-pill);
+  background: rgba(0, 190, 190, 0.1);
+  color: #5ee0e0;
+  font-size: 11px;
   font-weight: 600;
   font-family: Lexend, sans-serif;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  box-shadow: none;
 }
-.sidebar .logout:hover { color: #5ee0e0; }
+.sidebar .logout:hover {
+  background: rgba(0, 190, 190, 0.22);
+  border-color: #00bebe;
+  color: #ffffff;
+}
 .avatar, .dot {
   width: 34px; height: 34px; border-radius: 50%;
   display: grid; place-items: center; color: white; font-size: 12px; font-weight: 700; flex-shrink: 0;
