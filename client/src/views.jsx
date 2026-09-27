@@ -131,7 +131,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
           <p className="muted">{board.project.description}</p>
         </div>
         <div className="row">
-          <select value={projectId} onChange={(e) => onOpenProject(e.target.value)}>
+          <select className="project-select" value={projectId} onChange={(e) => onOpenProject(e.target.value)} aria-label="Projeto">
             {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
           </select>
           <button className={mode === "quadro" ? "primary" : "ghost"} onClick={() => setMode("quadro")}>Quadro</button>
