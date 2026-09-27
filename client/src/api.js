@@ -28,23 +28,30 @@ export async function api(path, options = {}) {
   return data;
 }
 
-export function money(cents) {
-  return (Number(cents || 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+export function money(cents, locale = "pt-BR") {
+  return (Number(cents || 0) / 100).toLocaleString(locale, { style: "currency", currency: "BRL" });
 }
 
-export function hoursLabel(minutes) {
+export function hoursLabel(minutes, t) {
   const total = Number(minutes || 0);
   const h = Math.floor(total / 60);
   const m = total % 60;
+  if (typeof t === "function") {
+    if (!h) return t("hours.min", { n: m });
+    if (!m) return t("hours.h", { n: h });
+    return t("hours.hm", { h, m });
+  }
   if (!h) return `${m} min`;
   if (!m) return `${h}h`;
   return `${h}h ${m}min`;
 }
 
-export function formatDate(value) {
+export function formatDate(value, locale = "pt-BR") {
   if (!value) return "";
   const [y, m, d] = value.slice(0, 10).split("-");
-  return `${d}/${m}/${y}`;
+  const date = new Date(Number(y), Number(m) - 1, Number(d));
+  if (Number.isNaN(date.getTime())) return `${d}/${m}/${y}`;
+  return date.toLocaleDateString(locale);
 }
 
 export function today() {

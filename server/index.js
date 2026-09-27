@@ -100,6 +100,41 @@ app.post("/api/auth/register", wrap((req, res) => {
   res.json({ token, user: publicUser(user) });
 }));
 
+app.post("/api/auth/social", wrap((req, res) => {
+  const provider = String(req.body.provider || "").toLowerCase();
+  const allowed = {
+    google: { name: "Google User", email: "google.user@idonea.com", color: "#ea4335" },
+    facebook: { name: "Facebook User", email: "facebook.user@idonea.com", color: "#1877f2" },
+    linkedin: { name: "LinkedIn User", email: "linkedin.user@idonea.com", color: "#0a66c2" },
+  };
+  const profile = allowed[provider];
+  if (!profile) throw httpError(400, "Provedor social inválido.");
+
+  const name = String(req.body.name || profile.name).trim() || profile.name;
+  const email = String(req.body.email || profile.email).trim().toLowerCase() || profile.email;
+  let user = get("SELECT * FROM users WHERE email = ?", email);
+  if (!user) {
+    const id = uid();
+    run(
+      "INSERT INTO users (id, name, email, password_hash, role, color, created_at) VALUES (?, ?, ?, ?, 'member', ?, ?)",
+      id,
+      name,
+      email,
+      bcrypt.hashSync(`social:${provider}:${uid()}`, 8),
+      profile.color,
+      nowIso()
+    );
+    user = get("SELECT * FROM users WHERE id = ?", id);
+    const projects = all("SELECT id FROM projects");
+    for (const project of projects) {
+      run("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'member')", project.id, id);
+    }
+  }
+  const token = issueToken(user);
+  run("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", token, user.id, nowIso());
+  res.json({ token, user: publicUser(user), provider });
+}));
+
 app.post("/api/auth/logout", (req, res) => {
   const token = tokenFrom(req);
   if (token) run("DELETE FROM sessions WHERE token = ?", token);

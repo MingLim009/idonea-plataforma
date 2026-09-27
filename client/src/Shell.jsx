@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "./api.js";
+import { LanguageSwitcher, useT } from "./i18n.jsx";
 import { LogoMark } from "./LogoMark.jsx";
 
 const ICONS = {
@@ -16,17 +17,10 @@ const ICONS = {
   close: "fi-rr-cross",
 };
 
-const NAV = [
-  ["inicio", "Início"],
-  ["projeto", "Projetos"],
-  ["tempo", "Horas"],
-  ["crm", "Vendas"],
-  ["importar", "Importar"],
-  ["ia", "Comandos"],
-  ["equipe", "Equipe"],
-];
+const NAV_IDS = ["inicio", "projeto", "tempo", "crm", "importar", "ia", "equipe"];
 
 export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject, tick, children }) {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -85,39 +79,46 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
     setNavOpen(false);
   };
 
+  const goHome = () => {
+    setPage("inicio");
+    setNavOpen(false);
+  };
+
   return (
     <div className={`app${navOpen ? " nav-open" : ""}`}>
       {navOpen && (
         <button
           type="button"
           className="nav-scrim"
-          aria-label="Fechar menu"
+          aria-label={t("nav.close")}
           onClick={() => setNavOpen(false)}
         />
       )}
       <aside
         className="sidebar"
         id="app-sidebar"
-        aria-label="Navegação principal"
+        aria-label={t("nav.aria")}
         data-open={navOpen ? "true" : "false"}
       >
         <div className="brand">
-          <LogoMark size={38} />
-          <div>
-            <strong>idônea</strong>
-            <span>Projetos, horas e vendas</span>
-          </div>
+          <button type="button" className="brand-home" onClick={goHome} aria-label={t("brand.home")} title={t("brand.home")}>
+            <LogoMark size={38} />
+            <div>
+              <strong>idônea</strong>
+              <span>{t("brand.tagline")}</span>
+            </div>
+          </button>
           <button
             type="button"
             className="nav-close"
-            aria-label="Fechar menu"
+            aria-label={t("nav.close")}
             onClick={() => setNavOpen(false)}
           >
             <i className={`fi ${ICONS.close}`} />
           </button>
         </div>
         <nav className="nav">
-          {NAV.map(([id, label]) => (
+          {NAV_IDS.map((id) => (
             <button
               key={id}
               type="button"
@@ -128,7 +129,7 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
               <span className="nav-ico" aria-hidden="true">
                 <i className={`fi ${ICONS[id]}`} />
               </span>
-              {label}
+              {t(`nav.${id}`)}
             </button>
           ))}
         </nav>
@@ -136,8 +137,8 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
           <span className="avatar" style={{ background: user.color }}>{user.name.slice(0, 1)}</span>
           <div>
             <strong>{user.name}</strong>
-            <small>{user.role === "admin" ? "Administração" : "Equipe"}</small>
-            <button type="button" className="logout" onClick={onLogout}>Sair</button>
+            <small>{user.role === "admin" ? t("user.admin") : t("user.member")}</small>
+            <button type="button" className="logout" onClick={onLogout}>{t("user.logout")}</button>
           </div>
         </div>
       </aside>
@@ -146,7 +147,7 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
           <button
             type="button"
             className="nav-toggle"
-            aria-label={navOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label={navOpen ? t("nav.close") : t("nav.open")}
             aria-expanded={navOpen}
             aria-controls="app-sidebar"
             onClick={() => setNavOpen((v) => !v)}
@@ -156,10 +157,10 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
           <div className="search">
             <i className={`fi ${ICONS.search} search-ico`} />
             <input
-              placeholder="Buscar tarefas, projetos…"
+              placeholder={t("search.placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              aria-label="Buscar"
+              aria-label={t("search.aria")}
             />
             {results.length > 0 && (
               <div className="results">
@@ -172,18 +173,19 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
               </div>
             )}
           </div>
+          <LanguageSwitcher className="topbar-lang" />
           <div className="bell">
-            <button type="button" onClick={() => setOpenNotes((value) => !value)} aria-label="Avisos">
+            <button type="button" onClick={() => setOpenNotes((value) => !value)} aria-label={t("notes.label")}>
               <i className={`fi ${ICONS.bell}`} />
-              <span className="bell-label">Avisos</span>
+              <span className="bell-label">{t("notes.label")}</span>
             </button>
             {unread > 0 && <span className="badge">{unread}</span>}
             {openNotes && (
               <div className="dropdown">
                 <button type="button" className="textish" onClick={() => api("/api/notifications/read-all", { method: "POST" }).then(() => setNotes(notes.map((note) => ({ ...note, read: 1 }))))}>
-                  Marcar como lidos
+                  {t("notes.markRead")}
                 </button>
-                {notes.length === 0 && <p className="empty-state">Nenhum aviso por agora.</p>}
+                {notes.length === 0 && <p className="empty-state">{t("notes.empty")}</p>}
                 {notes.map((note) => (
                   <button key={note.id} type="button" className={`note ${note.read ? "" : "unread"}`} onClick={() => {
                     api(`/api/notifications/${note.id}/read`, { method: "POST" });
@@ -202,10 +204,10 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
         <div className="content">{children}</div>
         {running && (
           <div className="timerbar">
-            <span>Timer · {running.title}</span>
+            <span>{t("timer.label")} · {running.title}</span>
             <strong>{formatClock(elapsed)}</strong>
             <button type="button" className="primary" onClick={() => api("/api/time/stop", { method: "POST" }).then(() => setRunning(null))}>
-              Parar e salvar
+              {t("timer.stop")}
             </button>
           </div>
         )}

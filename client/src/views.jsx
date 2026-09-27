@@ -2,54 +2,57 @@ import { useEffect, useState } from "react";
 import { DndContext, PointerSensor, closestCorners, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { api, formatDate, hoursLabel, money, priorityLabel, today } from "./api.js";
+import { priorityLabels, useI18n, useT } from "./i18n.jsx";
 
 export function Dashboard({ tick, onOpenProject, onOpenTask }) {
+  const t = useT();
+  const { locale } = useI18n();
   const [data, setData] = useState(null);
   useEffect(() => { api("/api/dashboard").then(setData).catch(() => {}); }, [tick]);
-  if (!data) return <p className="loading-line">Carregando o painel…</p>;
+  if (!data) return <p className="loading-line">{t("dash.loading")}</p>;
   return (
     <div>
       <div className="page-head">
         <div>
-          <h1>Início</h1>
-          <p className="muted">Simples para a equipe, poderoso para a gestão — o que pede atenção hoje.</p>
+          <h1>{t("dash.title")}</h1>
+          <p className="muted">{t("dash.lead")}</p>
         </div>
       </div>
       <div className="grid stats">
-        <div className="stat"><span className="muted">Atrasadas</span><b>{data.overdue}</b></div>
-        <div className="stat"><span className="muted">Horas na semana</span><b>{hoursLabel(data.hoursWeek)}</b></div>
-        <div className="stat"><span className="muted">Negócios abertos</span><b>{money(data.openDeals.cents)}</b></div>
-        <div className="stat"><span className="muted">Projetos</span><b>{data.projects.length}</b></div>
+        <div className="stat"><span className="muted">{t("dash.overdue")}</span><b>{data.overdue}</b></div>
+        <div className="stat"><span className="muted">{t("dash.hoursWeek")}</span><b>{hoursLabel(data.hoursWeek, t)}</b></div>
+        <div className="stat"><span className="muted">{t("dash.openDeals")}</span><b>{money(data.openDeals.cents, locale)}</b></div>
+        <div className="stat"><span className="muted">{t("dash.projects")}</span><b>{data.projects.length}</b></div>
       </div>
       <div className="split">
         <section className="panel">
-          <h2>Minhas tarefas</h2>
-          {data.myTasks.length === 0 && <p className="empty-state">Nada atribuído a você agora.</p>}
+          <h2>{t("dash.myTasks")}</h2>
+          {data.myTasks.length === 0 && <p className="empty-state">{t("dash.noTasks")}</p>}
           {data.myTasks.map((task) => (
             <button key={task.id} className="taskline" onClick={() => onOpenTask(task.id)}>
               <span>{task.title}</span>
-              <span className={task.due_date && task.due_date < today() ? "pill late" : "muted"}>{task.due_date ? formatDate(task.due_date) : task.project_name}</span>
+              <span className={task.due_date && task.due_date < today() ? "pill late" : "muted"}>{task.due_date ? formatDate(task.due_date, locale) : task.project_name}</span>
             </button>
           ))}
-          <h2 style={{ marginTop: 22 }}>Projetos</h2>
+          <h2 style={{ marginTop: 22 }}>{t("dash.projects")}</h2>
           {data.projects.map((project) => (
             <button key={project.id} className="taskline" onClick={() => onOpenProject(project.id)}>
               <span><i className="dot" style={{ background: project.color, display: "inline-block", width: 10, height: 10, marginRight: 8 }} />{project.name}</span>
-              <span className="muted">{project.open_tasks} abertas{project.overdue_tasks ? ` · ${project.overdue_tasks} atrasadas` : ""}</span>
+              <span className="muted">{t("dash.openCount", { n: project.open_tasks })}{project.overdue_tasks ? t("dash.overdueCount", { n: project.overdue_tasks }) : ""}</span>
             </button>
           ))}
         </section>
         <section className="panel">
-          <h2>Risco de atraso</h2>
-          {data.risks.length === 0 && <p className="empty-state">Nenhuma tarefa em risco.</p>}
+          <h2>{t("dash.risk")}</h2>
+          {data.risks.length === 0 && <p className="empty-state">{t("dash.noRisk")}</p>}
           {data.risks.map((task) => (
             <button key={task.id} className="taskline" onClick={() => onOpenTask(task.id)}>
               <span>{task.title}</span>
-              <span className={`pill ${task.level === "alto" ? "urgente" : "alta"}`}>{task.level === "alto" ? "Alto" : "Médio"}</span>
+              <span className={`pill ${task.level === "alto" ? "urgente" : "alta"}`}>{task.level === "alto" ? t("dash.high") : t("dash.medium")}</span>
             </button>
           ))}
-          <h2 style={{ marginTop: 22 }}>Atividade</h2>
-          {data.activity.length === 0 && <p className="empty-state">Sem atividade recente.</p>}
+          <h2 style={{ marginTop: 22 }}>{t("dash.activity")}</h2>
+          {data.activity.length === 0 && <p className="empty-state">{t("dash.noActivity")}</p>}
           {data.activity.map((item) => (
             <p key={item.id} className="muted" style={{ marginTop: 10, lineHeight: 1.45 }}>{item.detail}</p>
           ))}
@@ -60,6 +63,9 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
 }
 
 export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
+  const t = useT();
+  const { locale } = useI18n();
+  const labels = priorityLabels(t);
   const [projects, setProjects] = useState([]);
   const [board, setBoard] = useState(null);
   const [mode, setMode] = useState("quadro");
@@ -84,7 +90,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
   if (!projectId) {
     return (
       <div>
-        <h1>Projetos</h1>
+        <h1>{t("projects.title")}</h1>
         <ProjectForm draft={draft} setDraft={setDraft} onCreate={async () => {
           const project = await api("/api/projects", { method: "POST", body: draft });
           setDraft({ name: "", description: "" });
@@ -93,7 +99,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
       </div>
     );
   }
-  if (!board) return <p>{error || "Carregando…"}</p>;
+  if (!board) return <p>{error || t("common.loading")}</p>;
 
   const tasks = board.sections.flatMap((section) => section.tasks).filter((task) => {
     if (query.priority && task.priority !== query.priority) return false;
@@ -131,13 +137,13 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
           <p className="muted">{board.project.description}</p>
         </div>
         <div className="row">
-          <select className="project-select" value={projectId} onChange={(e) => onOpenProject(e.target.value)} aria-label="Projeto">
+          <select className="project-select" value={projectId} onChange={(e) => onOpenProject(e.target.value)} aria-label={t("common.project")}>
             {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
           </select>
-          <button className={mode === "quadro" ? "primary" : "ghost"} onClick={() => setMode("quadro")}>Quadro</button>
-          <button className={mode === "lista" ? "primary" : "ghost"} onClick={() => setMode("lista")}>Lista</button>
-          <button className="ghost" onClick={() => setShowActivity((value) => !value)}>Histórico</button>
-          <button className="ghost" onClick={() => setCreating((value) => !value)}>Novo projeto</button>
+          <button className={mode === "quadro" ? "primary" : "ghost"} onClick={() => setMode("quadro")}>{t("projects.board")}</button>
+          <button className={mode === "lista" ? "primary" : "ghost"} onClick={() => setMode("lista")}>{t("projects.list")}</button>
+          <button className="ghost" onClick={() => setShowActivity((value) => !value)}>{t("projects.history")}</button>
+          <button className="ghost" onClick={() => setCreating((value) => !value)}>{t("projects.new")}</button>
         </div>
       </div>
       {error && <div className="alert">{error}</div>}
@@ -149,17 +155,17 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
       }} />}
       <div className="filters">
         <select value={query.priority} onChange={(e) => setQuery({ ...query, priority: e.target.value })}>
-          <option value="">Prioridade</option>
-          {Object.entries(priorityLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          <option value="">{t("common.priority")}</option>
+          {Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
         <select value={query.assignee} onChange={(e) => setQuery({ ...query, assignee: e.target.value })}>
-          <option value="">Responsável</option>
+          <option value="">{t("common.assignee")}</option>
           {board.members.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}
         </select>
         <select value={query.status} onChange={(e) => setQuery({ ...query, status: e.target.value })}>
-          <option value="">Situação</option>
-          <option value="aberto">Abertas</option>
-          <option value="concluido">Concluídas</option>
+          <option value="">{t("common.status")}</option>
+          <option value="aberto">{t("common.open")}</option>
+          <option value="concluido">{t("common.done")}</option>
         </select>
         <span className="people">{board.members.map((person) => <span key={person.id} className="dot" title={person.name} style={{ background: person.color }}>{person.name.slice(0, 1)}</span>)}</span>
       </div>
@@ -174,15 +180,15 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
         </DndContext>
       ) : (
         <div className="table-scroll"><table className="table">
-          <thead><tr><th>Tarefa</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Horas</th></tr></thead>
+          <thead><tr><th>{t("projects.task")}</th><th>{t("common.assignee")}</th><th>{t("common.due")}</th><th>{t("common.priority")}</th><th>{t("projects.hours")}</th></tr></thead>
           <tbody>
             {tasks.map((task) => (
               <tr key={task.id}>
                 <td><button className="link" onClick={() => onOpenTask(task.id)}>{task.title}</button><div className="muted">{task.section_name}</div></td>
                 <td>{task.assignee_name || "—"}</td>
-                <td className={task.due_date && task.due_date < today() && task.status !== "concluido" ? "pill late" : ""}>{formatDate(task.due_date) || "—"}</td>
-                <td><span className={`pill ${task.priority}`}>{priorityLabel[task.priority]}</span></td>
-                <td>{hoursLabel(task.minutes)}</td>
+                <td className={task.due_date && task.due_date < today() && task.status !== "concluido" ? "pill late" : ""}>{formatDate(task.due_date, locale) || "—"}</td>
+                <td><span className={`pill ${task.priority}`}>{labels[task.priority] || priorityLabel[task.priority]}</span></td>
+                <td>{hoursLabel(task.minutes, t)}</td>
               </tr>
             ))}
           </tbody>
@@ -190,7 +196,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
       )}
       {showActivity && (
         <section className="panel" style={{ marginTop: 14 }}>
-          <h2>Histórico</h2>
+          <h2>{t("projects.history")}</h2>
           {activity.map((item) => <p key={item.id} style={{ marginTop: 8 }}>{item.detail}</p>)}
         </section>
       )}
@@ -199,18 +205,20 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
 }
 
 function ProjectForm({ draft, setDraft, onCreate }) {
+  const t = useT();
   return (
     <form className="panel" style={{ marginBottom: 14 }} onSubmit={(e) => { e.preventDefault(); onCreate(); }}>
       <div className="field inline">
-        <label className="field">Nome<input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required /></label>
-        <label className="field">Descrição<input value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></label>
+        <label className="field">{t("common.name")}<input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required /></label>
+        <label className="field">{t("common.description")}<input value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></label>
       </div>
-      <button className="primary">Criar projeto</button>
+      <button className="primary">{t("projects.create")}</button>
     </form>
   );
 }
 
 function Column({ section, tasks, onOpenTask, projectId }) {
+  const t = useT();
   const { setNodeRef, isOver } = useDroppable({ id: `col:${section.id}` });
   const [title, setTitle] = useState("");
   const tone = columnTone(section.name);
@@ -230,8 +238,8 @@ function Column({ section, tasks, onOpenTask, projectId }) {
         if (!next) return;
         api("/api/tasks", { method: "POST", body: { project_id: projectId, section_id: section.id, title: next } }).then(() => setTitle(""));
       }}>
-        <input name="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Nova tarefa" />
-        <button className="ghost" type="submit">Adicionar</button>
+        <input name="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("projects.newTask")} />
+        <button className="ghost" type="submit">{t("common.add")}</button>
       </form>
     </div>
   );
@@ -247,22 +255,25 @@ function columnTone(name = "") {
 }
 
 function TaskCard({ task, onOpen }) {
+  const t = useT();
+  const { locale } = useI18n();
+  const labels = priorityLabels(t);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id });
   const style = { transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.5 : 1 };
   const late = task.due_date && task.due_date < today() && task.status !== "concluido";
   const dateClass = late ? "late" : task.status === "concluido" ? "date-ok" : "date-warn";
   return (
     <article ref={setNodeRef} className="tcard" style={style} onClick={() => onOpen(task.id)}>
-      <button className="handle" {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} aria-label="Arrastar">⠿</button>
+      <button className="handle" {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} aria-label="Drag">⠿</button>
       <div>
         <h3>{task.title}</h3>
         {task.project_name && <div className="project-label">{task.project_name}</div>}
         <div className="meta">
-          <span className={`pill ${task.priority}`}>{priorityLabel[task.priority]}</span>
-          {task.due_date && <span className={`pill ${dateClass}`}>{formatDate(task.due_date)}</span>}
+          <span className={`pill ${task.priority}`}>{labels[task.priority] || priorityLabel[task.priority]}</span>
+          {task.due_date && <span className={`pill ${dateClass}`}>{formatDate(task.due_date, locale)}</span>}
           {task.assignee_name && <span className="dot" title={task.assignee_name} style={{ background: task.assignee_color }}>{task.assignee_name.slice(0, 1)}</span>}
           {task.subtask_count > 0 && <span className="muted">{task.subtask_done}/{task.subtask_count}</span>}
-          {task.comment_count > 0 && <span className="muted">{task.comment_count} coment.</span>}
+          {task.comment_count > 0 && <span className="muted">{task.comment_count}</span>}
         </div>
       </div>
     </article>
@@ -270,6 +281,7 @@ function TaskCard({ task, onOpen }) {
 }
 
 function NewColumn({ projectId }) {
+  const t = useT();
   const [name, setName] = useState("");
   return (
     <form className="column" onSubmit={(e) => {
@@ -279,7 +291,7 @@ function NewColumn({ projectId }) {
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Nova coluna"
+        placeholder={t("projects.newColumn")}
         style={{ width: "100%", border: "1px solid #d9e3ec", borderRadius: 10, padding: 10, background: "white" }}
       />
     </form>
@@ -287,6 +299,7 @@ function NewColumn({ projectId }) {
 }
 
 export function TimeView({ tick, onOpenTask }) {
+  const t = useT();
   const [running, setRunning] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
@@ -310,7 +323,7 @@ export function TimeView({ tick, onOpenTask }) {
 
   return (
     <div>
-      <div className="page-head"><div><h1>Horas</h1><p className="muted">Timer na tarefa, lançamento manual e relatório por pessoa, projeto e período.</p></div></div>
+      <div className="page-head"><div><h1>{t("time.title")}</h1><p className="muted">{t("time.manual")}</p></div></div>
       {error && <div className="alert">{error}</div>}
       <div className="split">
         <section className="panel">
@@ -384,6 +397,7 @@ export function TimeView({ tick, onOpenTask }) {
 }
 
 export function CrmView({ tick, onOpenProject }) {
+  const t = useT();
   const [tab, setTab] = useState("funil");
   const [board, setBoard] = useState(null);
   const [contacts, setContacts] = useState([]);
@@ -416,10 +430,10 @@ export function CrmView({ tick, onOpenProject }) {
 
   return (
     <div>
-      <div className="page-head"><div><h1>Vendas</h1><p className="muted">Funil, contatos e o caminho do negócio até o projeto.</p></div></div>
+      <div className="page-head"><div><h1>{t("crm.title")}</h1><p className="muted">{t("crm.funnel")}</p></div></div>
       {error && <div className="alert">{error}</div>}
       <div className="tabs">
-        {[["funil", "Funil"], ["contatos", "Contatos"], ["empresas", "Empresas"], ["atividades", "Atividades"], ["relatorios", "Relatórios"]].map(([id, label]) => (
+        {[["funil", t("crm.funnel")], ["contatos", t("crm.contacts")], ["empresas", t("crm.companies")], ["atividades", t("crm.activities")], ["relatorios", t("crm.reports")]].map(([id, label]) => (
           <button key={id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>
@@ -627,6 +641,7 @@ function Reports({ reports }) {
 }
 
 export function ImportView() {
+  const t = useT();
   const [asanaToken, setAsanaToken] = useState("");
   const [clockifyKey, setClockifyKey] = useState("");
   const [message, setMessage] = useState("");
@@ -655,7 +670,7 @@ export function ImportView() {
 
   return (
     <div>
-      <div className="page-head"><div><h1>Importar histórico</h1><p className="muted">Traga projetos e tarefas do Asana e as horas do Clockify, ligadas a cada tarefa.</p></div></div>
+      <div className="page-head"><div><h1>{t("import.title")}</h1><p className="muted">{t("import.asana")} · {t("import.clockify")}</p></div></div>
       {error && <div className="alert">{error}</div>}
       {message && <div className="ok">{message}</div>}
       <div className="split">
@@ -691,6 +706,7 @@ const COMMAND_EXAMPLES = [
 ];
 
 export function AiView({ gptKey, onOpenProject }) {
+  const t = useT();
   const [text, setText] = useState(COMMAND_EXAMPLES[0].text);
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState("");
@@ -742,7 +758,7 @@ export function AiView({ gptKey, onOpenProject }) {
     <div className="ai-page">
       <div className="page-head">
         <div>
-          <h1>Comandos</h1>
+          <h1>{t("ai.title")}</h1>
           <p className="muted">Escreva em português o que precisa — criar tarefa, horas, status ou resumo. A mesma API serve para o GPT.</p>
         </div>
       </div>
@@ -849,18 +865,19 @@ export function AiView({ gptKey, onOpenProject }) {
 }
 
 export function TeamView({ user }) {
+  const t = useT();
   const [people, setPeople] = useState([]);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "member" });
   const [error, setError] = useState("");
   useEffect(() => { api("/api/users").then(setPeople); }, []);
   return (
     <div>
-      <div className="page-head"><div><h1>Equipe</h1><p className="muted">Quem entra no workspace enxerga os projetos.</p></div></div>
+      <div className="page-head"><div><h1>{t("team.title")}</h1><p className="muted">{t("brand.tagline")}</p></div></div>
       {error && <div className="alert">{error}</div>}
       <div className="split">
         <div className="table-scroll"><table className="table">
-          <thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th></tr></thead>
-          <tbody>{people.map((person) => <tr key={person.id}><td>{person.name}</td><td>{person.email}</td><td>{person.role === "admin" ? "Administração" : "Equipe"}</td></tr>)}</tbody>
+          <thead><tr><th>{t("common.name")}</th><th>{t("team.email")}</th><th>{t("team.role")}</th></tr></thead>
+          <tbody>{people.map((person) => <tr key={person.id}><td>{person.name}</td><td>{person.email}</td><td>{person.role === "admin" ? t("user.admin") : t("user.member")}</td></tr>)}</tbody>
         </table></div>
         {user.role === "admin" && (
           <form className="panel" onSubmit={(e) => {
