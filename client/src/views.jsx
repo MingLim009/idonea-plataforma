@@ -173,7 +173,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
           </div>
         </DndContext>
       ) : (
-        <table className="table">
+        <div className="table-scroll"><table className="table">
           <thead><tr><th>Tarefa</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Horas</th></tr></thead>
           <tbody>
             {tasks.map((task) => (
@@ -186,7 +186,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       )}
       {showActivity && (
         <section className="panel" style={{ marginTop: 14 }}>
@@ -362,7 +362,7 @@ export function TimeView({ tick, onOpenTask }) {
             <div className="stat"><span className="muted">Total</span><b>{hoursLabel(report.total)}</b></div>
             {report.byUser.slice(0, 3).map((row) => <div key={row.id} className="stat"><span className="muted">{row.name}</span><b>{hoursLabel(row.minutes)}</b></div>)}
           </div>
-          <table className="table">
+          <div className="table-scroll"><table className="table">
             <thead><tr><th>Data</th><th>Pessoa</th><th>Projeto</th><th>Tarefa</th><th>Tempo</th><th>Origem</th></tr></thead>
             <tbody>
               {report.entries.map((entry) => (
@@ -376,7 +376,7 @@ export function TimeView({ tick, onOpenTask }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </>
       )}
     </div>
@@ -540,10 +540,10 @@ function Contacts({ contacts, companies }) {
   const [form, setForm] = useState({ name: "", email: "", phone: "", company_id: "" });
   return (
     <div className="split">
-      <table className="table">
+      <div className="table-scroll"><table className="table">
         <thead><tr><th>Nome</th><th>Empresa</th><th>E-mail</th><th>Telefone</th></tr></thead>
         <tbody>{contacts.map((contact) => <tr key={contact.id}><td>{contact.name}</td><td>{contact.company_name || "—"}</td><td>{contact.email}</td><td>{contact.phone}</td></tr>)}</tbody>
-      </table>
+      </table></div>
       <form className="panel" onSubmit={(e) => { e.preventDefault(); api("/api/crm/contacts", { method: "POST", body: form }); setForm({ name: "", email: "", phone: "", company_id: "" }); }}>
         <h2>Novo contato</h2>
         <label className="field">Nome<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
@@ -560,10 +560,10 @@ function Companies({ companies }) {
   const [form, setForm] = useState({ name: "", website: "" });
   return (
     <div className="split">
-      <table className="table">
+      <div className="table-scroll"><table className="table">
         <thead><tr><th>Empresa</th><th>Site</th></tr></thead>
         <tbody>{companies.map((company) => <tr key={company.id}><td>{company.name}</td><td>{company.website}</td></tr>)}</tbody>
-      </table>
+      </table></div>
       <form className="panel" onSubmit={(e) => { e.preventDefault(); api("/api/crm/companies", { method: "POST", body: form }); setForm({ name: "", website: "" }); }}>
         <h2>Nova empresa</h2>
         <label className="field">Nome<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
@@ -615,10 +615,10 @@ function Reports({ reports }) {
       </section>
       <section className="panel">
         <h2>Por vendedor</h2>
-        <table className="table">
+        <div className="table-scroll"><table className="table">
           <thead><tr><th>Pessoa</th><th>Abertos</th><th>Ganhos</th><th>Valor ganho</th></tr></thead>
           <tbody>{reports.byOwner.map((row) => <tr key={row.name}><td>{row.name}</td><td>{row.open_count}</td><td>{row.won_count}</td><td>{money(row.won_cents)}</td></tr>)}</tbody>
-        </table>
+        </table></div>
         <h3 style={{ marginTop: 16 }}>Previsão de fechamento</h3>
         {reports.predictions.map((item) => <p key={item.id} style={{ marginTop: 8 }}>{item.title}: {item.score}% · {item.reason}</p>)}
       </section>
@@ -858,10 +858,10 @@ export function TeamView({ user }) {
       <div className="page-head"><div><h1>Equipe</h1><p className="muted">Quem entra no workspace enxerga os projetos.</p></div></div>
       {error && <div className="alert">{error}</div>}
       <div className="split">
-        <table className="table">
+        <div className="table-scroll"><table className="table">
           <thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th></tr></thead>
           <tbody>{people.map((person) => <tr key={person.id}><td>{person.name}</td><td>{person.email}</td><td>{person.role === "admin" ? "Administração" : "Equipe"}</td></tr>)}</tbody>
-        </table>
+        </table></div>
         {user.role === "admin" && (
           <form className="panel" onSubmit={(e) => {
             e.preventDefault();
