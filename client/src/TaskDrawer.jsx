@@ -100,13 +100,17 @@ export function TaskDrawer({ taskId, tick, onClose }) {
             }}>{file.filename}</button>
           </div>
         ))}
-        <input type="file" onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          const body = new FormData();
-          body.append("file", file);
-          api(`/api/tasks/${task.id}/attachments`, { method: "POST", body }).then(load);
-        }} />
+        <label className="file-btn">
+          <input type="file" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const body = new FormData();
+            body.append("file", file);
+            api(`/api/tasks/${task.id}/attachments`, { method: "POST", body }).then(load);
+            e.target.value = "";
+          }} />
+          Escolher arquivo
+        </label>
         <h3 style={{ marginTop: 16 }}>Horas</h3>
         {task.timeEntries.map((entry) => (
           <div key={entry.id} className="comment">

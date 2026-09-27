@@ -4,9 +4,9 @@ import multer from "multer";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
-import { randomBytes } from "crypto";
 import { fileURLToPath } from "url";
 import { all, get, run, uid, nowIso, publicUser, uploadDirPath, httpError } from "./db.js";
+import { issueToken, verifyToken } from "./authToken.js";
 import { addClient, removeClient } from "./events.js";
 import * as logic from "./logic.js";
 
@@ -43,9 +43,16 @@ function auth(req, res, next) {
     }
   }
   const token = tokenFrom(req);
-  const user = token
-    ? get("SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?", token)
-    : null;
+  const claims = verifyToken(token);
+  let user = null;
+  if (claims) {
+    user =
+      get("SELECT * FROM users WHERE id = ?", claims.sub) ||
+      get("SELECT * FROM users WHERE email = ?", claims.email);
+  } else if (token) {
+    // legacy DB session (local / older clients)
+    user = get("SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?", token);
+  }
   if (!user) return res.status(401).json({ error: "Faça login para continuar." });
   req.user = user;
   next();
@@ -59,8 +66,8 @@ app.post("/api/auth/login", wrap((req, res) => {
   if (!user || !bcrypt.compareSync(req.body.password || "", user.password_hash)) {
     throw httpError(401, "E-mail ou senha incorretos.");
   }
-  const token = randomBytes(24).toString("hex");
-  run("INSERT INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", token, user.id, nowIso());
+  const token = issueToken(user);
+  run("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", token, user.id, nowIso());
   res.json({ token, user: publicUser(user) });
 }));
 
@@ -83,16 +90,17 @@ app.post("/api/auth/register", wrap((req, res) => {
     colors[Math.floor(Math.random() * colors.length)],
     nowIso()
   );
-  const token = randomBytes(24).toString("hex");
-  run("INSERT INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", token, id, nowIso());
+  const user = get("SELECT * FROM users WHERE id = ?", id);
+  const token = issueToken(user);
+  run("INSERT OR REPLACE INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)", token, id, nowIso());
   const projects = all("SELECT id, owner_id FROM projects");
   for (const project of projects) {
     run("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'member')", project.id, id);
   }
-  res.json({ token, user: publicUser(get("SELECT * FROM users WHERE id = ?", id)) });
+  res.json({ token, user: publicUser(user) });
 }));
 
-app.post("/api/auth/logout", auth, (req, res) => {
+app.post("/api/auth/logout", (req, res) => {
   const token = tokenFrom(req);
   if (token) run("DELETE FROM sessions WHERE token = ?", token);
   res.json({ ok: true });

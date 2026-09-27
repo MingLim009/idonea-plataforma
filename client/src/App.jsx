@@ -24,7 +24,12 @@ export default function App() {
         setUser(data.user);
         setGptKey(data.gptKey || "");
       })
-      .catch(() => clearToken())
+      .catch((err) => {
+        // Only drop session on real auth failure (not network blips)
+        if (/login|não autorizado|unauthorized|401/i.test(err.message || "")) {
+          clearToken();
+        }
+      })
       .finally(() => setBooting(false));
   }, []);
 

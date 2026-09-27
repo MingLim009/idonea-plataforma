@@ -2,7 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
-import { randomBytes, randomUUID } from "crypto";
+import { randomUUID } from "crypto";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -229,9 +229,10 @@ function seed() {
 
   const password = bcrypt.hashSync("demo123", 8);
   const created = nowIso();
-  const carolina = uid();
-  const marcelo = uid();
-  const ana = uid();
+  // Stable IDs so signed tokens survive Vercel /tmp DB resets
+  const carolina = "11111111-1111-4111-8111-111111111111";
+  const marcelo = "22222222-2222-4222-8222-222222222222";
+  const ana = "33333333-3333-4333-8333-333333333333";
 
   const people = [
     [carolina, "Carolina Santos", "carolina@idonea.com", "admin", "#c45c26"],
@@ -251,7 +252,7 @@ function seed() {
     );
   }
 
-  const gptKey = randomBytes(18).toString("hex");
+  const gptKey = "idonea-demo-gpt-key-6c4ae275eb2a114a";
   run("INSERT INTO settings (key, value) VALUES ('gpt_api_key', ?)", gptKey);
 
   const stageNames = [
