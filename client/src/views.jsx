@@ -12,7 +12,7 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
       <div className="page-head">
         <div>
           <h1>Início</h1>
-          <p className="muted">Prioridades, horas e riscos do dia — tudo em um olhar.</p>
+          <p className="muted">Simples para a equipe, poderoso para a gestão — o que pede atenção hoje.</p>
         </div>
       </div>
       <div className="grid stats">

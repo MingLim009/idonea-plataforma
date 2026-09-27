@@ -65,7 +65,7 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
           <LogoMark size={38} />
           <div>
             <strong>idônea</strong>
-            <span>Gestão em um só lugar</span>
+            <span>Projetos, horas e vendas</span>
           </div>
         </div>
         <nav className="nav">

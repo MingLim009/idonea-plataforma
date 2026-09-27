@@ -113,7 +113,7 @@ function Login({ onEnter }) {
             <span className="login-brand-name">idônea</span>
           </div>
           <h1 className="login-title">{mode === "conta" ? "Criar conta" : "Entrar"}</h1>
-          <p className="login-lead">Projetos, horas e vendas — claros, conectados e prontos para a equipe.</p>
+          <p className="login-lead">Tudo que você precisa para gerenciar projetos, horas e vendas em uma única plataforma.</p>
           {error && <div className="alert">{error}</div>}
           {mode === "conta" && (
             <label className="field">Nome<input value={name} onChange={(e) => setName(e.target.value)} required /></label>
@@ -133,37 +133,14 @@ function Login({ onEnter }) {
         </form>
       </div>
       <aside className="login-side" aria-hidden="true">
-        <div className="login-preview">
-          <div className="login-preview-rail">
-            <span style={{ background: "#00bebe" }} />
-            <span style={{ background: "#5dade2" }} />
-            <span style={{ background: "#f1c40f" }} />
-            <span style={{ background: "#e74c3c" }} />
-            <span style={{ background: "#9b59b6" }} />
-            <span style={{ background: "#8229f9" }} />
-          </div>
-          <div className="login-preview-body">
-            <div className="login-preview-top">
-              <strong>Analytics</strong>
-              <span>Esta semana</span>
-            </div>
-            <div className="login-preview-stat">
-              <span>Horas apontadas</span>
-              <b>49:32</b>
-            </div>
-            <div className="login-preview-bars">
-              <span style={{ height: "42%" }} />
-              <span style={{ height: "68%" }} />
-              <span style={{ height: "54%" }} />
-              <span style={{ height: "86%" }} />
-              <span style={{ height: "61%" }} />
-              <span style={{ height: "74%" }} />
-            </div>
-            <div className="login-preview-list">
-              <div><i className="dot-mark" /><span>Campanha primavera</span><small>Em andamento</small></div>
-              <div><i className="dot-mark" /><span>Site institucional</span><small>3 atrasadas</small></div>
-              <div><i className="dot-mark" /><span>Clínica Vale</span><small>No prazo</small></div>
-            </div>
+        <div className="login-hero">
+          <div className="login-hero-kicker">Gestão de projetos · BR</div>
+          <h2>Software para gestão de projetos e vendas</h2>
+          <p>Tarefas, Kanban, horas e CRM conectados — simples para a equipe, poderoso para a gestão.</p>
+          <div className="login-hero-points">
+            <span>Quadros Kanban e tarefas com responsáveis</span>
+            <span>Apontamento de horas nativo</span>
+            <span>Funil de vendas e comandos por texto</span>
           </div>
         </div>
       </aside>
