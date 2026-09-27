@@ -215,11 +215,7 @@ function Column({ section, tasks, onOpenTask, projectId }) {
   const [title, setTitle] = useState("");
   const tone = columnTone(section.name);
   return (
-    <div
-      className="column"
-      ref={setNodeRef}
-      style={isOver ? { borderColor: tone, boxShadow: `inset 0 0 0 1px ${tone}` } : undefined}
-    >
+    <div className="column" ref={setNodeRef} style={{ outline: isOver ? `2px solid ${tone}` : "none" }}>
       <header>
         <span className="col-title" style={{ color: tone }}>
           <span className="col-dot" style={{ background: tone }} />
@@ -227,12 +223,10 @@ function Column({ section, tasks, onOpenTask, projectId }) {
         </span>
         <span className="count">{tasks.length}</span>
       </header>
-      <div className="column-cards">
-        {tasks.map((task) => <TaskCard key={task.id} task={task} onOpen={onOpenTask} />)}
-      </div>
+      {tasks.map((task) => <TaskCard key={task.id} task={task} onOpen={onOpenTask} />)}
       <form className="composer" onSubmit={(e) => {
         e.preventDefault();
-        const next = title.trim();
+        const next = e.currentTarget.elements.namedItem("title").value.trim();
         if (!next) return;
         api("/api/tasks", { method: "POST", body: { project_id: projectId, section_id: section.id, title: next } }).then(() => setTitle(""));
       }}>
@@ -278,22 +272,16 @@ function TaskCard({ task, onOpen }) {
 function NewColumn({ projectId }) {
   const [name, setName] = useState("");
   return (
-    <form
-      className="column column-new"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const next = name.trim();
-        if (!next) return;
-        api(`/api/projects/${projectId}/sections`, { method: "POST", body: { name: next } }).then(() => setName(""));
-      }}
-    >
-      <header>
-        <span className="col-title">Nova coluna</span>
-      </header>
-      <div className="composer">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome da coluna" />
-        <button className="ghost" type="submit">Adicionar coluna</button>
-      </div>
+    <form className="column" onSubmit={(e) => {
+      e.preventDefault();
+      api(`/api/projects/${projectId}/sections`, { method: "POST", body: { name } }).then(() => setName(""));
+    }}>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Nova coluna"
+        style={{ width: "100%", border: "1px solid #d9e3ec", borderRadius: 10, padding: 10, background: "white" }}
+      />
     </form>
   );
 }
@@ -508,11 +496,7 @@ function StageColumn({ stage, onOpen }) {
   const total = stage.deals.reduce((sum, deal) => sum + deal.value_cents, 0);
   const tone = columnTone(stage.name) === "#00aec7" ? "#00bebe" : columnTone(stage.name);
   return (
-    <div
-      className="column"
-      ref={setNodeRef}
-      style={isOver ? { borderColor: "#00bebe", boxShadow: "inset 0 0 0 1px #00bebe" } : undefined}
-    >
+    <div className="column" ref={setNodeRef} style={{ outline: isOver ? "2px solid #00bebe" : "none" }}>
       <header>
         <span className="col-title" style={{ color: tone }}>
           <span className="col-dot" style={{ background: tone }} />
@@ -520,9 +504,7 @@ function StageColumn({ stage, onOpen }) {
         </span>
         <span className="count">{money(total)}</span>
       </header>
-      <div className="column-cards">
-        {stage.deals.map((deal) => <DealCard key={deal.id} deal={deal} onOpen={onOpen} />)}
-      </div>
+      {stage.deals.map((deal) => <DealCard key={deal.id} deal={deal} onOpen={onOpen} />)}
     </div>
   );
 }
