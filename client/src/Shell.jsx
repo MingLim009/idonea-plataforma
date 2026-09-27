@@ -87,14 +87,20 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
 
   return (
     <div className={`app${navOpen ? " nav-open" : ""}`}>
-      <button
-        type="button"
-        className="nav-scrim"
-        aria-label="Fechar menu"
-        tabIndex={navOpen ? 0 : -1}
-        onClick={() => setNavOpen(false)}
-      />
-      <aside className="sidebar" id="app-sidebar" aria-label="Navegação principal">
+      {navOpen && (
+        <button
+          type="button"
+          className="nav-scrim"
+          aria-label="Fechar menu"
+          onClick={() => setNavOpen(false)}
+        />
+      )}
+      <aside
+        className="sidebar"
+        id="app-sidebar"
+        aria-label="Navegação principal"
+        data-open={navOpen ? "true" : "false"}
+      >
         <div className="brand">
           <LogoMark size={38} />
           <div>

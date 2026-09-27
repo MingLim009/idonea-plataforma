@@ -1079,13 +1079,8 @@ input[type="checkbox"]:checked::after {
   .nav-close i { color: #5ee0e0; }
   .nav-scrim {
     display: block;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 220ms var(--ease);
-  }
-  .app.nav-open .nav-scrim {
     opacity: 1;
-    pointer-events: auto;
+    animation: dropIn 180ms var(--ease);
   }
   .sidebar {
     position: fixed;
@@ -1096,10 +1091,15 @@ input[type="checkbox"]:checked::after {
     transform: translateX(-105%);
     transition: transform 260ms var(--ease);
     box-shadow: none;
+    visibility: hidden;
+    pointer-events: none;
   }
-  .app.nav-open .sidebar {
+  .app.nav-open .sidebar,
+  .sidebar[data-open="true"] {
     transform: translateX(0);
     box-shadow: 24px 0 60px rgba(6, 10, 17, 0.35);
+    visibility: visible;
+    pointer-events: auto;
   }
   .brand { padding-right: 4px; }
   .login { grid-template-columns: 1fr; }
