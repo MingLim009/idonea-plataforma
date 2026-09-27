@@ -398,39 +398,53 @@ input[type="checkbox"]:checked::after {
 }
 
 .board {
-  display: flex; gap: 16px; align-items: flex-start; overflow-x: auto; padding: 6px 2px 16px;
+  display: flex; gap: 14px; align-items: stretch; overflow-x: auto; padding: 4px 0 16px;
   background: transparent; min-height: 420px;
   scrollbar-width: thin;
 }
 .column {
-  width: 300px; flex-shrink: 0; background: rgba(247, 249, 252, 0.9); border-radius: 14px; padding: 12px;
-  min-height: 200px; border: 1px solid var(--line);
+  width: 288px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 10px;
+  box-sizing: border-box;
+  background: #f4f7fb;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 220px;
+  border: 1px solid #dce3ec;
 }
-.column header { color: #14212b; }
 .column header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 12px; font-weight: 600;
-  font-family: Lexend, sans-serif; font-style: normal; padding: 2px 4px; font-size: 13px;
+  margin: 0; font-weight: 600; color: #14212b;
+  font-family: Lexend, sans-serif; font-style: normal;
+  padding: 0; font-size: 13px; width: 100%;
+  box-sizing: border-box;
 }
-.column header .col-title { display: flex; align-items: center; gap: 8px; }
+.column header .col-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .column header .count {
   background: #ffffff; color: #6b7588; border-radius: 99px; font-size: 12px;
   min-width: 24px; text-align: center; padding: 2px 8px; font-weight: 600;
-  font-family: Lexend, sans-serif; font-style: normal; border: 1px solid var(--line);
+  font-family: Lexend, sans-serif; font-style: normal; border: 1px solid #dce3ec;
+  flex-shrink: 0;
 }
-.col-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.col-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.column-cards {
+  display: flex; flex-direction: column; gap: 10px;
+  flex: 1; min-height: 0; width: 100%;
+}
 .tcard {
-  background: #ffffff; border-radius: 12px; padding: 14px; margin-bottom: 10px;
-  border: 1px solid #e8eef4;
-  box-shadow: 0 1px 2px rgba(30, 42, 60, 0.04);
+  width: 100%; box-sizing: border-box;
+  background: #ffffff; border-radius: 10px; padding: 12px;
+  margin: 0;
+  border: 1px solid #dce3ec;
+  box-shadow: none;
   display: grid; grid-template-columns: 16px 1fr; gap: 8px;
   color: #2e3950;
-  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), transform 160ms var(--ease);
+  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease);
 }
 .tcard:hover {
-  border-color: rgba(0, 190, 190, 0.55);
-  box-shadow: 0 6px 18px rgba(0, 190, 190, 0.12);
-  transform: translateY(-1px);
+  border-color: #00bebe;
+  box-shadow: 0 4px 12px rgba(0, 190, 190, 0.1);
+  transform: none;
 }
 .handle { color: #b7c2ce; background: transparent; border: 0; padding: 0; cursor: grab; line-height: 1; }
 .tcard h3 {
@@ -454,8 +468,37 @@ input[type="checkbox"]:checked::after {
 .pill.late { background: #ffecec; color: #c62828; }
 .pill.date-ok { background: #e9f7ee; color: #1e7a34; }
 .pill.date-warn { background: #fff8e0; color: #9a7400; }
-.composer { display: flex; gap: 6px; margin-top: 8px; }
-.composer input { background: #ffffff; border-radius: 6px; }
+/* Board composers: stack vertically, full width, borders align with cards */
+.composer {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 0; width: 100%; box-sizing: border-box;
+}
+.composer input,
+.column > input {
+  width: 100%; box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #dce3ec;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #2e3950;
+  font-family: Lexend, sans-serif;
+}
+.composer .ghost,
+.composer .primary {
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid #dce3ec;
+}
+.composer .ghost:hover {
+  border-color: #00bebe;
+}
+.column.column-new {
+  justify-content: flex-start;
+  background: transparent;
+  border-style: dashed;
+}
 .filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
 .filters select {
   background: #ffffff; border: 1.5px solid #cfd8e3; border-radius: 8px;
