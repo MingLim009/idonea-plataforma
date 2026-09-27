@@ -62,7 +62,7 @@ export default function App() {
     setPage("projeto");
   }
 
-  if (booting) return <div className="content"><p className="loading-line">Abrindo a Idônea…</p></div>;
+  if (booting) return <p className="loading-line">Abrindo a Idônea…</p>;
   if (!user) return <Login onEnter={enter} />;
 
   return (
