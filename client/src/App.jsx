@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, clearToken, getToken, setToken } from "./api.js";
 import { LanguageSwitcher, useT } from "./i18n.jsx";
+import { Loader } from "./Loader.jsx";
 import { Shell } from "./Shell.jsx";
 import { LogoMark } from "./LogoMark.jsx";
 import { AiView, CrmView, Dashboard, ImportView, ProjectView, TeamView, TimeView } from "./views.jsx";
@@ -73,7 +74,7 @@ export default function App() {
     setPage("projeto");
   }
 
-  if (booting) return <p className="loading-line">{t("app.loading")}</p>;
+  if (booting) return <Loader label={t("app.loading")} />;
   if (!user) return <Login onEnter={enter} onSocial={enterSocial} />;
 
   return (

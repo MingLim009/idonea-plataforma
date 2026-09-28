@@ -3,13 +3,14 @@ import { DndContext, PointerSensor, closestCorners, useDraggable, useDroppable, 
 import { CSS } from "@dnd-kit/utilities";
 import { api, formatDate, hoursLabel, money, priorityLabel, today } from "./api.js";
 import { priorityLabels, useI18n, useT } from "./i18n.jsx";
+import { Loader } from "./Loader.jsx";
 
 export function Dashboard({ tick, onOpenProject, onOpenTask }) {
   const t = useT();
   const { locale } = useI18n();
   const [data, setData] = useState(null);
   useEffect(() => { api("/api/dashboard").then(setData).catch(() => {}); }, [tick]);
-  if (!data) return <p className="loading-line">{t("dash.loading")}</p>;
+  if (!data) return <Loader label={t("dash.loading")} />;
   return (
     <div>
       <div className="page-head">
