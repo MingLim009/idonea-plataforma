@@ -1186,8 +1186,8 @@ input[type="checkbox"]:checked::after {
 }
 .loader-arcs {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 128px;
+  height: 128px;
 }
 .loader-ring {
   position: absolute;
@@ -1200,37 +1200,38 @@ input[type="checkbox"]:checked::after {
 .loader-arc-path {
   fill: none;
   stroke-linecap: round;
-  stroke-width: 3.5;
-  transform-origin: 40px 40px;
+  stroke-width: 5;
+  transform-origin: 60px 60px;
   transform: rotate(-90deg);
 }
 .loader-ring-1 .loader-arc-path {
   stroke: #00bebe;
-  stroke-dasharray: 70 214;
+  stroke-dasharray: 110 327;
 }
 .loader-ring-2 {
   animation-delay: 0.18s;
 }
 .loader-ring-2 .loader-arc-path {
   stroke: #f98f03;
-  stroke-dasharray: 52 164;
-  stroke-width: 3.25;
+  stroke-dasharray: 85 251;
+  stroke-width: 4.75;
 }
 .loader-ring-3 {
   animation-delay: 0.36s;
 }
 .loader-ring-3 .loader-arc-path {
-  stroke: #8229f9;
-  stroke-dasharray: 36 113;
-  stroke-width: 3;
+  stroke: #1a6b8a;
+  stroke-dasharray: 58 176;
+  stroke-width: 4.5;
 }
 .loader-label {
   margin: 0;
   color: #5c6b7a;
   font-family: Barlow, sans-serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 400;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
 }
 @keyframes loaderSpin {
   from { transform: rotate(0deg); }

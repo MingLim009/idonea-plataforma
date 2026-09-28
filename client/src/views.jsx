@@ -10,7 +10,7 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
   const { locale } = useI18n();
   const [data, setData] = useState(null);
   useEffect(() => { api("/api/dashboard").then(setData).catch(() => {}); }, [tick]);
-  if (!data) return <Loader label={t("dash.loading")} />;
+  if (!data) return <Loader />;
   return (
     <div>
       <div className="page-head">

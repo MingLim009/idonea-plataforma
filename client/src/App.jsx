@@ -74,7 +74,7 @@ export default function App() {
     setPage("projeto");
   }
 
-  if (booting) return <Loader label={t("app.loading")} />;
+  if (booting) return <Loader />;
   if (!user) return <Login onEnter={enter} onSocial={enterSocial} />;
 
   return (
