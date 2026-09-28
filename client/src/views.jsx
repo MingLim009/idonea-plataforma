@@ -235,7 +235,9 @@ function Column({ section, tasks, onOpenTask, projectId }) {
         </span>
         <span className="count">{tasks.length}</span>
       </header>
-      {tasks.map((task) => <TaskCard key={task.id} task={task} onOpen={onOpenTask} />)}
+      <div className="lane-cards">
+        {tasks.map((task) => <TaskCard key={task.id} task={task} onOpen={onOpenTask} />)}
+      </div>
       <form className="composer" onSubmit={(e) => {
         e.preventDefault();
         const next = e.currentTarget.elements.namedItem("title").value.trim();
@@ -251,10 +253,10 @@ function Column({ section, tasks, onOpenTask, projectId }) {
 
 function columnTone(name = "") {
   const value = name.toLowerCase();
-  if (value.includes("conclu") || value.includes("feito") || value.includes("ganho")) return "#28a745";
-  if (value.includes("andamento") || value.includes("fazendo") || value.includes("negocia")) return "#007bff";
-  if (value.includes("revis") || value.includes("proposta")) return "#8229f9";
-  if (value.includes("qualifica")) return "#f98f03";
+  if (value.includes("conclu") || value.includes("feito") || value.includes("ganho") || value.includes("done") || value.includes("hecho") || value.includes("terminé")) return "#28a745";
+  if (value.includes("andamento") || value.includes("fazendo") || value.includes("negocia") || value.includes("progress") || value.includes("curso") || value.includes("cours")) return "#007bff";
+  if (value.includes("revis") || value.includes("proposta") || value.includes("review") || value.includes("revue")) return "#8229f9";
+  if (value.includes("qualifica") || value.includes("qualification")) return "#f98f03";
   return "#00aec7";
 }
 
@@ -289,7 +291,7 @@ function NewColumn({ projectId }) {
   const t = useT();
   const [name, setName] = useState("");
   return (
-    <form className="column" onSubmit={(e) => {
+    <form className="column new-lane-form" onSubmit={(e) => {
       e.preventDefault();
       api(`/api/projects/${projectId}/sections`, { method: "POST", body: { name } }).then(() => setName(""));
     }}>
@@ -333,43 +335,43 @@ export function TimeView({ tick, onOpenTask }) {
       {error && <div className="alert">{error}</div>}
       <div className="split">
         <section className="panel">
-          <h2>Lançar horas</h2>
+          <h2>{t("time.log")}</h2>
           <form onSubmit={(e) => {
             e.preventDefault();
             api("/api/time/manual", { method: "POST", body: { task_id: form.task_id, minutes: Math.round(Number(form.hours) * 60), note: form.note, work_date: form.work_date } })
               .then(() => setForm({ ...form, note: "" }))
               .catch((err) => setError(err.message));
           }}>
-            <label className="field">Tarefa
+            <label className="field">{t("time.task")}
               <select value={form.task_id} onChange={(e) => setForm({ ...form, task_id: e.target.value })} required>
-                <option value="">Escolha</option>
-                {tasks.map((task) => <option key={task.id} value={task.id}>{task.project_name} — {task.title}</option>)}
+                <option value="">{t("time.choose")}</option>
+                {tasks.map((task) => <option key={task.id} value={task.id}>{tx(task.project_name)} — {tx(task.title)}</option>)}
               </select>
             </label>
             <div className="field inline">
-              <label className="field">Horas<input type="number" min="0.25" step="0.25" value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })} /></label>
-              <label className="field">Data<input type="date" value={form.work_date} onChange={(e) => setForm({ ...form, work_date: e.target.value })} /></label>
+              <label className="field">{t("time.hours")}<input type="number" min="0.25" step="0.25" value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })} /></label>
+              <label className="field">{t("time.date")}<input type="date" value={form.work_date} onChange={(e) => setForm({ ...form, work_date: e.target.value })} /></label>
             </div>
-            <label className="field">Nota<input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></label>
-            <button className="primary">Lançar</button>
+            <label className="field">{t("time.note")}<input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></label>
+            <button className="primary">{t("time.submit")}</button>
           </form>
-          {running && <p style={{ marginTop: 12 }}>Timer aberto em {running.title}. Use a barra de baixo para parar.</p>}
+          {running && <p style={{ marginTop: 12 }}>{t("time.running", { title: tx(running.title) })}</p>}
         </section>
         <section className="panel">
-          <h2>Filtro do relatório</h2>
+          <h2>{t("time.filter")}</h2>
           <div className="field inline">
-            <label className="field">De<input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} /></label>
-            <label className="field">Até<input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} /></label>
+            <label className="field">{t("time.from")}<input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} /></label>
+            <label className="field">{t("time.to")}<input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} /></label>
           </div>
-          <label className="field">Pessoa
+          <label className="field">{t("time.user")}
             <select value={filters.user_id} onChange={(e) => setFilters({ ...filters, user_id: e.target.value })}>
-              <option value="">Todas</option>
+              <option value="">{t("time.allUsers")}</option>
               {users.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}
             </select>
           </label>
-          <label className="field">Projeto
+          <label className="field">{t("common.project")}
             <select value={filters.project_id} onChange={(e) => setFilters({ ...filters, project_id: e.target.value })}>
-              <option value="">Todos</option>
+              <option value="">{t("time.allProjects")}</option>
               {projects.map((project) => <option key={project.id} value={project.id}>{tx(project.name)}</option>)}
             </select>
           </label>
@@ -378,11 +380,11 @@ export function TimeView({ tick, onOpenTask }) {
       {report && (
         <>
           <div className="grid stats" style={{ marginTop: 14 }}>
-            <div className="stat"><span className="muted">Total</span><b>{hoursLabel(report.total)}</b></div>
-            {report.byUser.slice(0, 3).map((row) => <div key={row.id} className="stat"><span className="muted">{row.name}</span><b>{hoursLabel(row.minutes)}</b></div>)}
+            <div className="stat"><span className="muted">{t("time.total")}</span><b>{hoursLabel(report.total, t)}</b></div>
+            {report.byUser.slice(0, 3).map((row) => <div key={row.id} className="stat"><span className="muted">{row.name}</span><b>{hoursLabel(row.minutes, t)}</b></div>)}
           </div>
           <div className="table-scroll"><table className="table">
-            <thead><tr><th>Data</th><th>Pessoa</th><th>Projeto</th><th>Tarefa</th><th>Tempo</th><th>Origem</th></tr></thead>
+            <thead><tr><th>{t("time.date")}</th><th>{t("time.user")}</th><th>{t("common.project")}</th><th>{t("time.task")}</th><th>{t("time.title")}</th><th>{t("time.source")}</th></tr></thead>
             <tbody>
               {report.entries.map((entry) => (
                 <tr key={entry.id}>
@@ -502,14 +504,14 @@ function DealForm({ users, contacts, companies, stages }) {
       </div>
       <div className="field inline">
         <label className="field">{t("crm.stage")}<select value={form.stage_id} onChange={(e) => setForm({ ...form, stage_id: e.target.value })}>{stages.map((stage) => <option key={stage.id} value={stage.id}>{tx(stage.name)}</option>)}</select></label>
-        <label className="field">Previsão<input type="date" value={form.expected_close} onChange={(e) => setForm({ ...form, expected_close: e.target.value })} /></label>
+        <label className="field">{t("common.due")}<input type="date" value={form.expected_close} onChange={(e) => setForm({ ...form, expected_close: e.target.value })} /></label>
       </div>
       <div className="field inline">
-        <label className="field">Empresa<select value={form.company_id} onChange={(e) => setForm({ ...form, company_id: e.target.value })}><option value="">—</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select></label>
-        <label className="field">Contato<select value={form.contact_id} onChange={(e) => setForm({ ...form, contact_id: e.target.value })}><option value="">—</option>{contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.name}</option>)}</select></label>
+        <label className="field">{t("crm.company")}<select value={form.company_id} onChange={(e) => setForm({ ...form, company_id: e.target.value })}><option value="">—</option>{companies.map((company) => <option key={company.id} value={company.id}>{tx(company.name)}</option>)}</select></label>
+        <label className="field">{t("crm.contact")}<select value={form.contact_id} onChange={(e) => setForm({ ...form, contact_id: e.target.value })}><option value="">—</option>{contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.name}</option>)}</select></label>
       </div>
-      <label className="field">Vendedor<select value={form.owner_id} onChange={(e) => setForm({ ...form, owner_id: e.target.value })}><option value="">Eu</option>{users.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>
-      <button className="primary">Adicionar negócio</button>
+      <label className="field">{t("crm.seller")}<select value={form.owner_id} onChange={(e) => setForm({ ...form, owner_id: e.target.value })}><option value="">{t("crm.me")}</option>{users.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>
+      <button className="primary">{t("crm.newDeal")}</button>
     </form>
   );
 }
@@ -528,7 +530,9 @@ function StageColumn({ stage, onOpen }) {
         </span>
         <span className="count">{money(total)}</span>
       </header>
-      {stage.deals.map((deal) => <DealCard key={deal.id} deal={deal} onOpen={onOpen} />)}
+      <div className="lane-cards">
+        {stage.deals.map((deal) => <DealCard key={deal.id} deal={deal} onOpen={onOpen} />)}
+      </div>
     </div>
   );
 }
@@ -838,10 +842,10 @@ export function AiView({ gptKey, onOpenProject }) {
 
         <aside className="ai-side">
           <section className="panel ai-summary-card">
-            <h2>Resumo do projeto</h2>
-            <p className="muted">Gere um panorama rápido do andamento.</p>
+            <h2>{t("ai.ex.summary")}</h2>
+            <p className="muted">{t("ai.lead")}</p>
             <label className="field">
-              Projeto
+              {t("common.project")}
               <select value={projectId} onChange={(e) => { setProjectId(e.target.value); setSummary(""); }}>
                 {projects.map((project) => (
                   <option key={project.id} value={project.id}>{tx(project.name)}</option>
@@ -902,7 +906,7 @@ export function TeamView({ user }) {
             e.preventDefault();
             api("/api/users", { method: "POST", body: form }).then((person) => { setPeople([...people, person]); setForm({ name: "", email: "", password: "", role: "member" }); }).catch((err) => setError(err.message));
           }}>
-            <h2>Adicionar pessoa</h2>
+            <h2>{t("team.invite")}</h2>
             <label className="field">Nome<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
             <label className="field">E-mail<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /></label>
             <label className="field">Senha<input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /></label>

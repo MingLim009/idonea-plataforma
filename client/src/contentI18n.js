@@ -22,12 +22,12 @@ const CONTENT = {
     fr: "Visuels, médias et validation de la campagne de printemps.",
   },
   "Presença digital — Clínica Vale": {
-    en: "Digital presence — Clínica Vale",
+    en: "Digital presence — Vale Clinic",
     es: "Presencia digital — Clínica Vale",
     fr: "Présence digitale — Clínica Vale",
   },
   "Projeto aberto a partir do negócio ganho com a Clínica Vale.": {
-    en: "Project opened from the won deal with Clínica Vale.",
+    en: "Project opened from the won deal with Vale Clinic.",
     es: "Proyecto abierto a partir del negocio ganado con Clínica Vale.",
     fr: "Projet ouvert à partir de l’affaire gagnée avec Clínica Vale.",
   },
@@ -258,7 +258,7 @@ const CONTENT = {
   "Aurora Alimentos": { en: "Aurora Alimentos", es: "Aurora Alimentos", fr: "Aurora Alimentos" },
   "Norte Solar": { en: "Norte Solar", es: "Norte Solar", fr: "Norte Solar" },
   "Oficina Leme": { en: "Oficina Leme", es: "Oficina Leme", fr: "Oficina Leme" },
-  "Clínica Vale": { en: "Clínica Vale", es: "Clínica Vale", fr: "Clínica Vale" },
+  "Clínica Vale": { en: "Vale Clinic", es: "Clínica Vale", fr: "Clínica Vale" },
   "Estúdio Bruma": { en: "Estúdio Bruma", es: "Estúdio Bruma", fr: "Estúdio Bruma" },
 
   // Risk / prediction reasons
@@ -304,6 +304,9 @@ export function translateContent(text, lang) {
   let out = String(text);
   for (const [pt, map] of Object.entries(CONTENT)) {
     if (map[lang] && out.includes(pt)) out = out.split(pt).join(map[lang]);
+  }
+  if (lang === "en") {
+    out = out.replace(/Clínica/g, "Clinic").replace(/Clinica/g, "Clinic");
   }
   return out;
 }
