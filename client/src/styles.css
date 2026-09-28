@@ -366,15 +366,18 @@ h1, h2, h3 {
   background: #ffffff;
   border: 0;
   border-radius: var(--radius-pill);
-  padding: 10px 18px;
+  padding: 0;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 0;
   color: #2e3950;
   font-family: Lexend, sans-serif;
   font-weight: 500;
   font-size: 14px;
-  min-height: 46px;
   box-shadow: 0 6px 20px rgba(6, 10, 17, 0.05);
 }
 .bell > button:hover, .iconbtn:hover {
@@ -847,6 +850,12 @@ input[type="checkbox"]:checked::after {
   box-shadow: 0 0 0 4px rgba(0, 190, 190, 0.14);
 }
 .topbar-lang .lang-switch-label { display: none; }
+.topbar-lang select {
+  min-width: 64px;
+  max-width: 72px;
+  text-align: center;
+  padding-inline: 12px 30px;
+}
 .login-lang-bar {
   position: absolute;
   top: calc(14px + var(--safe-top));

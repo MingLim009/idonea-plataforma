@@ -730,7 +730,7 @@ export function LanguageSwitcher({ className = "" }) {
       <span className="lang-switch-label">{t("lang.label")}</span>
       <select value={lang} onChange={(e) => setLang(e.target.value)} aria-label={t("lang.label")}>
         {languages.map((item) => (
-          <option key={item.id} value={item.id}>{item.short} · {item.label}</option>
+          <option key={item.id} value={item.id}>{item.short}</option>
         ))}
       </select>
     </label>

@@ -177,7 +177,6 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
           <div className="bell">
             <button type="button" onClick={() => setOpenNotes((value) => !value)} aria-label={t("notes.label")}>
               <i className={`fi ${ICONS.bell}`} />
-              <span className="bell-label">{t("notes.label")}</span>
             </button>
             {unread > 0 && <span className="badge">{unread}</span>}
             {openNotes && (
