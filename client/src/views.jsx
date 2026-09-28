@@ -557,48 +557,52 @@ function DealCard({ deal, onOpen }) {
 }
 
 function StageEditor() {
+  const t = useT();
   const [name, setName] = useState("");
   return (
     <form className="composer" style={{ marginTop: 12 }} onSubmit={(e) => { e.preventDefault(); api("/api/crm/stages", { method: "POST", body: { name } }).then(() => setName("")); }}>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nova etapa do funil" />
-      <button className="ghost">Adicionar etapa</button>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("crm.newStage")} />
+      <button className="ghost">{t("common.add")}</button>
     </form>
   );
 }
 
 function Contacts({ contacts, companies }) {
+  const t = useT();
+  const tx = useTx();
   const [form, setForm] = useState({ name: "", email: "", phone: "", company_id: "" });
   return (
     <div className="split">
       <div className="table-scroll"><table className="table">
-        <thead><tr><th>Nome</th><th>Empresa</th><th>E-mail</th><th>Telefone</th></tr></thead>
-        <tbody>{contacts.map((contact) => <tr key={contact.id}><td>{contact.name}</td><td>{contact.company_name || "—"}</td><td>{contact.email}</td><td>{contact.phone}</td></tr>)}</tbody>
+        <thead><tr><th>{t("common.name")}</th><th>{t("crm.company")}</th><th>{t("team.email")}</th><th>{t("crm.contact")}</th></tr></thead>
+        <tbody>{contacts.map((contact) => <tr key={contact.id}><td>{contact.name}</td><td>{tx(contact.company_name) || "—"}</td><td>{contact.email}</td><td>{contact.phone}</td></tr>)}</tbody>
       </table></div>
       <form className="panel" onSubmit={(e) => { e.preventDefault(); api("/api/crm/contacts", { method: "POST", body: form }); setForm({ name: "", email: "", phone: "", company_id: "" }); }}>
-        <h2>Novo contato</h2>
-        <label className="field">Nome<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
-        <label className="field">E-mail<input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
-        <label className="field">Telefone<input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></label>
-        <label className="field">Empresa<select value={form.company_id} onChange={(e) => setForm({ ...form, company_id: e.target.value })}><option value="">—</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select></label>
-        <button className="primary">Salvar</button>
+        <h2>{t("crm.contacts")}</h2>
+        <label className="field">{t("common.name")}<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
+        <label className="field">{t("team.email")}<input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
+        <label className="field">{t("crm.company")}<select value={form.company_id} onChange={(e) => setForm({ ...form, company_id: e.target.value })}><option value="">—</option>{companies.map((company) => <option key={company.id} value={company.id}>{tx(company.name)}</option>)}</select></label>
+        <button className="primary">{t("common.save")}</button>
       </form>
     </div>
   );
 }
 
 function Companies({ companies }) {
+  const t = useT();
+  const tx = useTx();
   const [form, setForm] = useState({ name: "", website: "" });
   return (
     <div className="split">
       <div className="table-scroll"><table className="table">
-        <thead><tr><th>Empresa</th><th>Site</th></tr></thead>
-        <tbody>{companies.map((company) => <tr key={company.id}><td>{company.name}</td><td>{company.website}</td></tr>)}</tbody>
+        <thead><tr><th>{t("crm.company")}</th><th>Web</th></tr></thead>
+        <tbody>{companies.map((company) => <tr key={company.id}><td>{tx(company.name)}</td><td>{company.website}</td></tr>)}</tbody>
       </table></div>
       <form className="panel" onSubmit={(e) => { e.preventDefault(); api("/api/crm/companies", { method: "POST", body: form }); setForm({ name: "", website: "" }); }}>
-        <h2>Nova empresa</h2>
-        <label className="field">Nome<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
-        <label className="field">Site<input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} /></label>
-        <button className="primary">Salvar</button>
+        <h2>{t("crm.companies")}</h2>
+        <label className="field">{t("common.name")}<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
+        <label className="field">Web<input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} /></label>
+        <button className="primary">{t("common.save")}</button>
       </form>
     </div>
   );
