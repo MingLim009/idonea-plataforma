@@ -700,6 +700,7 @@ input[type="checkbox"]:checked::after {
   border-style: dashed;
   border-color: #9fb6c7;
 }
+.col-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 .tcard {
   background: #ffffff;
   border-radius: 14px;
