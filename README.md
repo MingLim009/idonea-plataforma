@@ -1,48 +1,87 @@
-# Idônea — Fase 1 (Asana + horas)
+# Idônea — plataforma de projetos, horas e vendas
 
-Entrega alinhada ao combinado no Workana com o Marcelo:
+Produto em português (PT-BR) no estilo Asana + horas nativas + importação Asana/Clockify, com módulo de vendas incluso.
 
-1. **Agora (15–20 dias):** plataforma no estilo **Asana** + **timer de horas nativo** + importação funcional **Asana + Clockify**, hospedada na **VPS** (Hostinger KVM 2).
-2. **Depois (+20 dias):** projeto **separado** no estilo **Pipedrive** (CRM).
+## Contas de demonstração
 
-> O CRM já existe neste código como módulo antecipado; o contrato pediu dois projetos separados — a Fase 2 pode extrair/refinar o CRM.
+| E-mail | Senha | Papel |
+|--------|-------|-------|
+| `carolina@idonea.com` | `demo123` | Administração |
+| `marcelo@idonea.com` | `demo123` | Administração |
+| `ana@idonea.com` | `demo123` | Equipe |
 
-## Demo rápida (local)
+Também é possível **criar conta** pela tela de cadastro (e-mail + senha).
+
+## Rodar local
 
 ```bash
 npm install
 npm run dev
 ```
 
-http://localhost:5173 — senha `demo123`  
-`carolina@idonea.com` · `marcelo@idonea.com` · `ana@idonea.com`
+Abre em http://localhost:5173 (API em http://localhost:4000).
 
-## Deploy na VPS (Hostinger KVM 2)
+## O que está pronto
+
+- Autenticação e-mail/senha (entrar + criar conta)
+- Projetos, Kanban (arrastar tarefas), lista, histórico
+- Tarefas: prioridade, prazo, responsável, subtarefas, anexos, comentários, timer
+- Horas: timer, lançamento manual, relatório
+- Importação Asana (token) e Clockify (API key) com paginação completa + exemplos
+- Comandos em texto + API GPT (`POST /api/gpt`, header `X-Api-Key`)
+- Vendas (funil, negócios, contatos, empresas, atividades)
+- Equipe (convidar pessoas — admin)
+- Deploy Docker/VPS com volume persistente
+- Demo em Vercel: https://idonea-plataforma.vercel.app  
+  (aviso: no Vercel o SQLite fica em `/tmp` e pode resetar; use VPS para produção)
+
+## Deploy na VPS (Hostinger / Docker)
 
 ```bash
-# no servidor
-git clone <seu-repo> idonea && cd idonea
-export SESSION_SECRET="$(openssl rand -hex 32)"
+git clone https://github.com/MingLim009/idonea-plataforma.git idonea
+cd idonea
+cp .env.example .env
+# edite SESSION_SECRET com: openssl rand -hex 32
 docker compose up -d --build
 ```
 
-App em `http://SEU_IP:4000`  
-Dados e anexos ficam no volume Docker `idonea_data` (não somem no restart).
+- App: `http://SEU_IP:4000`
+- Saúde: `http://SEU_IP:4000/api/health`
+- Dados em volume Docker `idonea_data` (não somem no restart)
+- Proxy HTTP (domínio apontando para a VPS):
 
-## Módulos Fase 1 (foco)
+```bash
+docker compose --profile proxy up -d --build
+```
 
-- Projetos, Kanban, tarefas, subtarefas, anexos, comentários, menções, avisos
-- Horas: timer nativo, lançamento manual, relatório
-- Importação Asana + Clockify (API + exemplo)
-- Comandos / API GPT: `POST /api/gpt` com header `X-Api-Key`
+Backup:
 
-## O que ainda falta para fechar o contrato
+```bash
+chmod +x scripts/backup.sh
+./scripts/backup.sh
+```
 
-| Item | Status |
-|------|--------|
-| App Asana + horas funcionando | Pronto (demo) |
-| Import Asana/Clockify | Pronto (limites de API; reforçar se cliente tiver muito histórico) |
-| GitHub | Precisa login `gh auth login` nesta máquina |
-| VPS Hostinger KVM 2 | Docker pronto — falta servidor + domínio do cliente |
-| Postgres/Supabase self-hosted | Combinado na proposta — próximo passo na VPS |
-| Projeto CRM separado (Fase 2) | Depois da VPS Fase 1 |
+## Variáveis de ambiente
+
+Veja `.env.example`.
+
+| Variável | Uso |
+|----------|-----|
+| `SESSION_SECRET` | Obrigatório em produção (assinatura dos tokens) |
+| `OPENAI_API_KEY` | Opcional — respostas GPT nos Comandos |
+| `DATA_DIR` / `UPLOAD_DIR` | Paths de SQLite e anexos (Docker: `/data`) |
+
+## API GPT
+
+1. Em **Equipe** / configuração, use a chave demo ou defina a do sistema  
+2. `POST /api/gpt` com header `X-Api-Key: <chave>` e corpo JSON `{ "text": "Criar tarefa Revisar proposta no projeto Site institucional" }`
+
+## O que ainda depende do cliente (não dá para fechar sozinho)
+
+1. Acesso à **VPS Hostinger** + DNS do domínio  
+2. Tokens reais **Asana/Clockify** do Marcelo para validar o histórico dele  
+3. Decisão se o **CRM** fica neste app ou vira o projeto Fase 2 separado (contrato)
+
+## Stack
+
+React + Vite · Express · SQLite · Docker

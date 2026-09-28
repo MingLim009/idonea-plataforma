@@ -227,10 +227,13 @@ function seed() {
 
   const password = bcrypt.hashSync("demo123", 8);
   const created = nowIso();
-  // Stable IDs so signed tokens survive Vercel /tmp DB resets
+  // Stable IDs so signed tokens AND project links survive Vercel /tmp DB resets
   const carolina = "11111111-1111-4111-8111-111111111111";
   const marcelo = "22222222-2222-4222-8222-222222222222";
   const ana = "33333333-3333-4333-8333-333333333333";
+  const projectSite = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+  const projectCampanha = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+  const projectVale = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
   const people = [
     [carolina, "Carolina Santos", "carolina@idonea.com", "admin", "#c45c26"],
@@ -289,6 +292,7 @@ function seed() {
   };
 
   const site = createProject({
+    id: projectSite,
     name: "Site institucional",
     description: "Novo site da Idônea, com páginas, conteúdo e publicação.",
     color: "#c45c26",
@@ -296,6 +300,7 @@ function seed() {
     source: "manual",
   });
   const campanha = createProject({
+    id: projectCampanha,
     name: "Campanha primavera",
     description: "Peças, mídia e aprovação da campanha de primavera.",
     color: "#2457c5",
@@ -303,6 +308,7 @@ function seed() {
     source: "manual",
   });
   const vale = createProject({
+    id: projectVale,
     name: "Presença digital — Clínica Vale",
     description: "Projeto aberto a partir do negócio ganho com a Clínica Vale.",
     color: "#1f8a70",
@@ -664,8 +670,8 @@ function insertContact(companyId, name, email, phone) {
   return id;
 }
 
-function createProject({ name, description, color, ownerId, source, dealId = null }) {
-  const id = uid();
+function createProject({ id: fixedId = null, name, description, color, ownerId, source, dealId = null }) {
+  const id = fixedId || uid();
   run(
     `INSERT INTO projects (id, name, description, color, owner_id, source, deal_id, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,

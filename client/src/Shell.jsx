@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "./api.js";
-import { LanguageSwitcher, useT, useTx } from "./i18n.jsx";
+import { useT, useTx } from "./i18n.jsx";
 import { LogoMark } from "./LogoMark.jsx";
 
 const ICONS = {
@@ -144,6 +144,21 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
         </div>
       </aside>
       <section className="main">
+        <div className="canvas-motif" aria-hidden="true">
+          <svg className="canvas-motif-ring canvas-motif-ring-tl" viewBox="0 0 360 360" fill="none">
+            <circle cx="180" cy="180" r="150" stroke="currentColor" strokeWidth="1.2" opacity="0.28" />
+            <circle cx="180" cy="180" r="118" stroke="currentColor" strokeWidth="1" opacity="0.16" />
+            <path d="M30 180c0-82.8 67.2-150 150-150" stroke="#00bebe" strokeWidth="2.4" strokeLinecap="round" />
+            <path d="M330 180c0 82.8-67.2 150-150 150" stroke="#f98f03" strokeWidth="1.8" strokeLinecap="round" opacity="0.8" />
+          </svg>
+          <svg className="canvas-motif-ring canvas-motif-ring-br" viewBox="0 0 300 300" fill="none">
+            <circle cx="150" cy="150" r="122" stroke="currentColor" strokeWidth="1" opacity="0.2" />
+            <path d="M28 150c0-67.4 54.6-122 122-122" stroke="#5ee0e0" strokeWidth="2" strokeLinecap="round" opacity="0.75" />
+            <path d="M150 28c67.4 0 122 54.6 122 122" stroke="#00aec7" strokeWidth="1.5" strokeLinecap="round" opacity="0.45" />
+          </svg>
+          <span className="canvas-orb canvas-orb-a" />
+          <span className="canvas-orb canvas-orb-b" />
+        </div>
         <header className="topbar">
           <button
             type="button"
@@ -174,7 +189,6 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
               </div>
             )}
           </div>
-          <LanguageSwitcher className="topbar-lang" />
           <div className="bell">
             <button type="button" onClick={() => setOpenNotes((value) => !value)} aria-label={t("notes.label")}>
               <i className={`fi ${ICONS.bell}`} />

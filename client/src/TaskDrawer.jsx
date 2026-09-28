@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, formatDate, getToken, hoursLabel, today } from "./api.js";
-import { priorityLabels, useI18n, useT, useTx } from "./i18n.jsx";
+import { priorityLabels, localizeApiError, useI18n, useT, useTx } from "./i18n.jsx";
 
 export function TaskDrawer({ taskId, tick, onClose }) {
   const t = useT();
@@ -13,11 +13,17 @@ export function TaskDrawer({ taskId, tick, onClose }) {
   const [subtask, setSubtask] = useState("");
   const [error, setError] = useState("");
 
+  function showError(err) {
+    setError(localizeApiError(err?.message || err, t));
+  }
+
   function load() {
-    api(`/api/tasks/${taskId}`).then(setTask).catch((err) => setError(err.message));
+    api(`/api/tasks/${taskId}`).then(setTask).catch(showError);
   }
 
   useEffect(() => {
+    setError("");
+    setTask(null);
     load();
     api("/api/users").then(setUsers).catch(() => {});
   }, [taskId, tick]);
@@ -31,7 +37,7 @@ export function TaskDrawer({ taskId, tick, onClose }) {
   }
 
   function save(patch) {
-    api(`/api/tasks/${task.id}`, { method: "PATCH", body: patch }).then(setTask).catch((err) => setError(err.message));
+    api(`/api/tasks/${task.id}`, { method: "PATCH", body: patch }).then(setTask).catch(showError);
   }
 
   return (
@@ -70,7 +76,7 @@ export function TaskDrawer({ taskId, tick, onClose }) {
           <button className="ghost" onClick={() => save({ status: task.status === "concluido" ? "aberto" : "concluido" })}>
             {task.status === "concluido" ? t("drawer.reopen") : t("drawer.complete")}
           </button>
-          <button className="danger" onClick={() => api(`/api/tasks/${task.id}`, { method: "DELETE" }).then(onClose).catch((err) => setError(err.message))}>{t("common.delete")}</button>
+          <button className="danger" onClick={() => api(`/api/tasks/${task.id}`, { method: "DELETE" }).then(onClose).catch(showError)}>{t("common.delete")}</button>
         </div>
         <p className="muted" style={{ margin: "10px 0" }}>
           {t("drawer.estimate", {

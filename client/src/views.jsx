@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { DndContext, PointerSensor, closestCorners, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { api, formatDate, hoursLabel, money, priorityLabel, today } from "./api.js";
-import { priorityLabels, useI18n, useT, useTx } from "./i18n.jsx";
+import { priorityLabels, localizeApiError, useI18n, useT, useTx } from "./i18n.jsx";
 import { Loader } from "./Loader.jsx";
 
 export function Dashboard({ tick, onOpenProject, onOpenTask }) {
@@ -80,15 +80,82 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
   const [error, setError] = useState("");
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
-  useEffect(() => { api("/api/projects").then(setProjects).catch((err) => setError(err.message)); }, [tick]);
   useEffect(() => {
-    if (!projectId && projects[0]) onOpenProject(projects[0].id);
-  }, [projects, projectId]);
+    let cancelled = false;
+    api("/api/projects")
+      .then((list) => { if (!cancelled) setProjects(list); })
+      .catch((err) => { if (!cancelled) setError(localizeApiError(err.message, t)); });
+    return () => { cancelled = true; };
+  }, [tick, t]);
+
   useEffect(() => {
-    if (!projectId) return;
-    api(`/api/projects/${projectId}/board`).then(setBoard).catch((err) => setError(err.message));
-    api(`/api/activity?project_id=${projectId}`).then(setActivity).catch(() => {});
-  }, [projectId, tick]);
+    if (!projects.length) return;
+    if (!projectId || !projects.some((project) => project.id === projectId)) {
+      onOpenProject(projects[0].id);
+    }
+  }, [projects, projectId, onOpenProject]);
+
+  useEffect(() => {
+    if (!projectId) return undefined;
+    let cancelled = false;
+    setError("");
+    api(`/api/projects/${projectId}/board`)
+      .then((data) => {
+        if (cancelled) return;
+        setBoard(data);
+        setError("");
+      })
+      .catch(async (err) => {
+        if (cancelled) return;
+        const missing = /não encontrad|not found/i.test(err.message || "");
+        if (missing) {
+          try {
+            const fresh = await api("/api/projects");
+            if (cancelled) return;
+            setProjects(fresh);
+            if (!fresh.some((project) => project.id === projectId)) {
+              if (fresh[0]) onOpenProject(fresh[0].id);
+              else {
+                setBoard(null);
+                setError(localizeApiError(err.message, t));
+              }
+              return;
+            }
+            // Same id listed but board failed (stale instance): retry once.
+            const retry = await api(`/api/projects/${projectId}/board`);
+            if (cancelled) return;
+            setBoard(retry);
+            setError("");
+            return;
+          } catch {
+            if (cancelled) return;
+          }
+        }
+        setBoard(null);
+        setError(localizeApiError(err.message, t));
+      });
+    api(`/api/activity?project_id=${projectId}`).then((rows) => {
+      if (!cancelled) setActivity(rows);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [projectId, tick, t, onOpenProject]);
+
+  async function deleteProject() {
+    if (!board?.project) return;
+    const name = tx(board.project.name);
+    if (!window.confirm(t("projects.deleteConfirm", { name }))) return;
+    setError("");
+    try {
+      await api(`/api/projects/${projectId}`, { method: "DELETE" });
+      const remaining = await api("/api/projects");
+      setProjects(remaining);
+      setBoard(null);
+      if (remaining[0]) onOpenProject(remaining[0].id);
+      else onOpenProject(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
 
   if (!projectId) {
     return (
@@ -102,7 +169,35 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
       </div>
     );
   }
-  if (!board) return <p>{error || t("common.loading")}</p>;
+  if (!board) {
+    return (
+      <div>
+        {error && <div className="alert">{error}</div>}
+        {projects.length > 0 ? (
+          <div className="page-head">
+            <div>
+              <h1>{t("projects.title")}</h1>
+              {!error && <p className="muted">{t("common.loading")}</p>}
+            </div>
+            <div className="row">
+              <select
+                className="project-select"
+                value={projectId || ""}
+                onChange={(e) => onOpenProject(e.target.value)}
+                aria-label={t("common.project")}
+              >
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>{tx(project.name)}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        ) : (
+          !error && <p>{t("common.loading")}</p>
+        )}
+      </div>
+    );
+  }
 
   const tasks = board.sections.flatMap((section) => section.tasks).filter((task) => {
     if (query.priority && task.priority !== query.priority) return false;
@@ -147,6 +242,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
           <button className={mode === "lista" ? "primary" : "ghost"} onClick={() => setMode("lista")}>{t("projects.list")}</button>
           <button className="ghost" onClick={() => setShowActivity((value) => !value)}>{t("projects.history")}</button>
           <button className="ghost" onClick={() => setCreating((value) => !value)}>{t("projects.new")}</button>
+          <button type="button" className="danger" onClick={deleteProject}>{t("projects.delete")}</button>
         </div>
       </div>
       {error && <div className="alert">{error}</div>}

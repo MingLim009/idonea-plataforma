@@ -4,8 +4,11 @@ server/data
 server/data.sqlite
 server/data.sqlite-*
 server/uploads
+backups
 .DS_Store
 .env
-.env.*
+.env.local
+.env.*.local
+!.env.example
 .vercel
 *.log

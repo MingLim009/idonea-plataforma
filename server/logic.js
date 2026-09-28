@@ -173,6 +173,23 @@ export function createProject(user, { name, description = "", color = "#c45c26",
   return get("SELECT * FROM projects WHERE id = ?", id);
 }
 
+export function deleteProject(user, projectId) {
+  const project = assertProjectAccess(projectId, user);
+  if (user.role !== "admin" && project.owner_id !== user.id) {
+    throw httpError(403, "Só o dono do projeto, ou um administrador, pode excluí-lo.");
+  }
+  run("UPDATE deals SET project_id = NULL WHERE project_id = ?", projectId);
+  run("DELETE FROM activities WHERE project_id = ?", projectId);
+  run("DELETE FROM projects WHERE id = ?", projectId);
+  logActivity({
+    userId: user.id,
+    action: "excluiu",
+    detail: `${user.name} excluiu o projeto ${project.name}`,
+  });
+  touch();
+  return { ok: true, id: projectId };
+}
+
 export function board(projectId, user) {
   const project = assertProjectAccess(projectId, user);
   const sections = all("SELECT * FROM sections WHERE project_id = ? ORDER BY position", projectId);
@@ -846,8 +863,11 @@ export function importClockifyPayload(user, payload) {
   return { entries: linked, tasksCreated: createdTasks, skipped };
 }
 
-async function asanaGet(token, path) {
-  const response = await fetch(`https://app.asana.com/api/1.0${path}`, {
+async function asanaFetch(token, path) {
+  const url = path.startsWith("http")
+    ? path
+    : `https://app.asana.com/api/1.0${path.startsWith("/") ? path : `/${path}`}`;
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const body = await response.json().catch(() => ({}));
@@ -855,23 +875,41 @@ async function asanaGet(token, path) {
     const message = body.errors?.[0]?.message || "Não foi possível falar com o Asana.";
     throw httpError(response.status === 401 ? 401 : 502, message);
   }
+  return body;
+}
+
+async function asanaGet(token, path) {
+  const body = await asanaFetch(token, path);
   return body.data;
+}
+
+async function asanaGetAll(token, path) {
+  const rows = [];
+  let next = path.includes("?") ? `${path}&limit=100` : `${path}?limit=100`;
+  let guard = 0;
+  while (next && guard < 200) {
+    guard += 1;
+    const body = await asanaFetch(token, next);
+    rows.push(...(body.data || []));
+    next = body.next_page?.path || null;
+  }
+  return rows;
 }
 
 export async function importAsanaToken(user, token) {
   if (!token) throw httpError(400, "Informe o token do Asana.");
-  const workspaces = await asanaGet(token, "/workspaces");
+  const workspaces = await asanaGet(token, "/workspaces?limit=100");
   if (!workspaces.length) throw httpError(400, "O token não enxerga nenhum workspace do Asana.");
-  const projects = await asanaGet(
+  const projects = await asanaGetAll(
     token,
-    `/projects?workspace=${workspaces[0].gid}&limit=15&opt_fields=name,notes`
+    `/projects?workspace=${workspaces[0].gid}&opt_fields=name,notes`
   );
   const payload = { projects: [] };
   for (const project of projects) {
-    const sections = await asanaGet(token, `/projects/${project.gid}/sections`);
-    const tasks = await asanaGet(
+    const sections = await asanaGetAll(token, `/projects/${project.gid}/sections`);
+    const tasks = await asanaGetAll(
       token,
-      `/tasks?project=${project.gid}&limit=100&opt_fields=name,notes,due_on,completed,assignee.name,memberships.section.name`
+      `/tasks?project=${project.gid}&opt_fields=name,notes,due_on,completed,assignee.name,memberships.section.name`
     );
     payload.projects.push({
       name: project.name,
@@ -909,30 +947,60 @@ async function clockifyGet(apiKey, path) {
   return body;
 }
 
+async function clockifyGetAllPages(apiKey, basePath) {
+  const rows = [];
+  let page = 1;
+  const pageSize = 200;
+  let guard = 0;
+  while (guard < 250) {
+    guard += 1;
+    const sep = basePath.includes("?") ? "&" : "?";
+    const chunk = await clockifyGet(apiKey, `${basePath}${sep}page=${page}&page-size=${pageSize}`);
+    const list = Array.isArray(chunk) ? chunk : [];
+    rows.push(...list);
+    if (list.length < pageSize) break;
+    page += 1;
+  }
+  return rows;
+}
+
 export async function importClockifyKey(user, apiKey) {
   if (!apiKey) throw httpError(400, "Informe a chave do Clockify.");
   const me = await clockifyGet(apiKey, "/user");
   const workspaces = await clockifyGet(apiKey, "/workspaces");
   if (!workspaces.length) throw httpError(400, "A chave não enxerga nenhum workspace do Clockify.");
   const workspace = workspaces[0];
-  const projects = await clockifyGet(apiKey, `/workspaces/${workspace.id}/projects?page-size=100`);
+  const projects = await clockifyGetAllPages(apiKey, `/workspaces/${workspace.id}/projects`);
   const projectName = Object.fromEntries(projects.map((project) => [project.id, project.name]));
-  const entries = await clockifyGet(
-    apiKey,
-    `/workspaces/${workspace.id}/user/${me.id}/time-entries?page-size=200`
-  );
-  const payload = {
-    entries: (Array.isArray(entries) ? entries : []).map((entry) => ({
-      description: entry.description || "Hora sem descrição",
-      project: projectName[entry.projectId] || "Clockify",
-      user: me.name,
-      minutes: clockifyMinutes(entry.timeInterval?.duration),
-      date: entry.timeInterval?.start,
-      note: "Importado da API do Clockify",
-    })).filter((entry) => entry.minutes > 0),
-  };
-  if (!payload.entries.length) throw httpError(400, "Não há horas lançadas nesse usuário do Clockify.");
-  return importClockifyPayload(user, payload);
+  let members = [];
+  try {
+    members = await clockifyGetAllPages(apiKey, `/workspaces/${workspace.id}/users`);
+  } catch {
+    members = [{ id: me.id, name: me.name }];
+  }
+  if (!members.length) members = [{ id: me.id, name: me.name }];
+
+  const entries = [];
+  for (const member of members) {
+    const memberEntries = await clockifyGetAllPages(
+      apiKey,
+      `/workspaces/${workspace.id}/user/${member.id}/time-entries`
+    );
+    for (const entry of memberEntries) {
+      const minutes = clockifyMinutes(entry.timeInterval?.duration);
+      if (minutes <= 0) continue;
+      entries.push({
+        description: entry.description || "Hora sem descrição",
+        project: projectName[entry.projectId] || "Clockify",
+        user: member.name || me.name,
+        minutes,
+        date: entry.timeInterval?.start,
+        note: "Importado da API do Clockify",
+      });
+    }
+  }
+  if (!entries.length) throw httpError(400, "Não há horas lançadas nesse usuário do Clockify.");
+  return importClockifyPayload(user, { entries });
 }
 
 export const sampleAsana = {
