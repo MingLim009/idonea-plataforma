@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "./api.js";
-import { LanguageSwitcher, useT } from "./i18n.jsx";
+import { LanguageSwitcher, useT, useTx } from "./i18n.jsx";
 import { LogoMark } from "./LogoMark.jsx";
 
 const ICONS = {
@@ -21,6 +21,7 @@ const NAV_IDS = ["inicio", "projeto", "tempo", "crm", "importar", "ia", "equipe"
 
 export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject, tick, children }) {
   const t = useT();
+  const tx = useTx();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -166,8 +167,8 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
               <div className="results">
                 {results.map((task) => (
                   <button key={task.id} type="button" onClick={() => { onOpenTask(task.id); setQuery(""); }}>
-                    {task.title}
-                    <div className="muted">{task.project_name}</div>
+                    {tx(task.title)}
+                    <div className="muted">{tx(task.project_name)}</div>
                   </button>
                 ))}
               </div>
@@ -192,8 +193,8 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
                     if (note.href?.startsWith("project:") && onOpenProject) onOpenProject(note.href.slice(8));
                     setOpenNotes(false);
                   }}>
-                    <strong>{note.title}</strong>
-                    <div className="muted">{note.body}</div>
+                    <strong>{tx(note.title)}</strong>
+                    <div className="muted">{tx(note.body)}</div>
                   </button>
                 ))}
               </div>
@@ -203,7 +204,7 @@ export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject
         <div className="content">{children}</div>
         {running && (
           <div className="timerbar">
-            <span>{t("timer.label")} · {running.title}</span>
+            <span>{t("timer.label")} · {tx(running.title)}</span>
             <strong>{formatClock(elapsed)}</strong>
             <button type="button" className="primary" onClick={() => api("/api/time/stop", { method: "POST" }).then(() => setRunning(null))}>
               {t("timer.stop")}

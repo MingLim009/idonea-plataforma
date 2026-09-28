@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { DndContext, PointerSensor, closestCorners, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { api, formatDate, hoursLabel, money, priorityLabel, today } from "./api.js";
-import { priorityLabels, useI18n, useT } from "./i18n.jsx";
+import { priorityLabels, useI18n, useT, useTx } from "./i18n.jsx";
 import { Loader } from "./Loader.jsx";
 
 export function Dashboard({ tick, onOpenProject, onOpenTask }) {
   const t = useT();
+  const tx = useTx();
   const { locale } = useI18n();
   const [data, setData] = useState(null);
   useEffect(() => { api("/api/dashboard").then(setData).catch(() => {}); }, [tick]);
@@ -31,14 +32,14 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
           {data.myTasks.length === 0 && <p className="empty-state">{t("dash.noTasks")}</p>}
           {data.myTasks.map((task) => (
             <button key={task.id} className="taskline" onClick={() => onOpenTask(task.id)}>
-              <span>{task.title}</span>
-              <span className={task.due_date && task.due_date < today() ? "pill late" : "muted"}>{task.due_date ? formatDate(task.due_date, locale) : task.project_name}</span>
+              <span>{tx(task.title)}</span>
+              <span className={task.due_date && task.due_date < today() ? "pill late" : "muted"}>{task.due_date ? formatDate(task.due_date, locale) : tx(task.project_name)}</span>
             </button>
           ))}
           <h2 style={{ marginTop: 22 }}>{t("dash.projects")}</h2>
           {data.projects.map((project) => (
             <button key={project.id} className="taskline" onClick={() => onOpenProject(project.id)}>
-              <span><i className="dot" style={{ background: project.color, display: "inline-block", width: 10, height: 10, marginRight: 8 }} />{project.name}</span>
+              <span><i className="dot" style={{ background: project.color, display: "inline-block", width: 10, height: 10, marginRight: 8 }} />{tx(project.name)}</span>
               <span className="muted">{t("dash.openCount", { n: project.open_tasks })}{project.overdue_tasks ? t("dash.overdueCount", { n: project.overdue_tasks }) : ""}</span>
             </button>
           ))}
@@ -48,14 +49,14 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
           {data.risks.length === 0 && <p className="empty-state">{t("dash.noRisk")}</p>}
           {data.risks.map((task) => (
             <button key={task.id} className="taskline" onClick={() => onOpenTask(task.id)}>
-              <span>{task.title}</span>
+              <span>{tx(task.title)}</span>
               <span className={`pill ${task.level === "alto" ? "urgente" : "alta"}`}>{task.level === "alto" ? t("dash.high") : t("dash.medium")}</span>
             </button>
           ))}
           <h2 style={{ marginTop: 22 }}>{t("dash.activity")}</h2>
           {data.activity.length === 0 && <p className="empty-state">{t("dash.noActivity")}</p>}
           {data.activity.map((item) => (
-            <p key={item.id} className="muted" style={{ marginTop: 10, lineHeight: 1.45 }}>{item.detail}</p>
+            <p key={item.id} className="muted" style={{ marginTop: 10, lineHeight: 1.45 }}>{tx(item.detail)}</p>
           ))}
         </section>
       </div>
@@ -65,6 +66,7 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
 
 export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
   const t = useT();
+  const tx = useTx();
   const { locale } = useI18n();
   const labels = priorityLabels(t);
   const [projects, setProjects] = useState([]);
@@ -134,12 +136,12 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
     <div>
       <div className="page-head">
         <div>
-          <h1>{board.project.name}</h1>
-          <p className="muted">{board.project.description}</p>
+          <h1>{tx(board.project.name)}</h1>
+          <p className="muted">{tx(board.project.description)}</p>
         </div>
         <div className="row">
           <select className="project-select" value={projectId} onChange={(e) => onOpenProject(e.target.value)} aria-label={t("common.project")}>
-            {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+            {projects.map((project) => <option key={project.id} value={project.id}>{tx(project.name)}</option>)}
           </select>
           <button className={mode === "quadro" ? "primary" : "ghost"} onClick={() => setMode("quadro")}>{t("projects.board")}</button>
           <button className={mode === "lista" ? "primary" : "ghost"} onClick={() => setMode("lista")}>{t("projects.list")}</button>
@@ -185,7 +187,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
           <tbody>
             {tasks.map((task) => (
               <tr key={task.id}>
-                <td><button className="link" onClick={() => onOpenTask(task.id)}>{task.title}</button><div className="muted">{task.section_name}</div></td>
+                <td><button className="link" onClick={() => onOpenTask(task.id)}>{tx(task.title)}</button><div className="muted">{tx(task.section_name)}</div></td>
                 <td>{task.assignee_name || "—"}</td>
                 <td className={task.due_date && task.due_date < today() && task.status !== "concluido" ? "pill late" : ""}>{formatDate(task.due_date, locale) || "—"}</td>
                 <td><span className={`pill ${task.priority}`}>{labels[task.priority] || priorityLabel[task.priority]}</span></td>
@@ -198,7 +200,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
       {showActivity && (
         <section className="panel" style={{ marginTop: 14 }}>
           <h2>{t("projects.history")}</h2>
-          {activity.map((item) => <p key={item.id} style={{ marginTop: 8 }}>{item.detail}</p>)}
+          {activity.map((item) => <p key={item.id} style={{ marginTop: 8 }}>{tx(item.detail)}</p>)}
         </section>
       )}
     </div>
@@ -220,6 +222,7 @@ function ProjectForm({ draft, setDraft, onCreate }) {
 
 function Column({ section, tasks, onOpenTask, projectId }) {
   const t = useT();
+  const tx = useTx();
   const { setNodeRef, isOver } = useDroppable({ id: `col:${section.id}` });
   const [title, setTitle] = useState("");
   const tone = columnTone(section.name);
@@ -228,7 +231,7 @@ function Column({ section, tasks, onOpenTask, projectId }) {
       <header>
         <span className="col-title" style={{ color: tone }}>
           <span className="col-dot" style={{ background: tone }} />
-          {section.name}
+          {tx(section.name)}
         </span>
         <span className="count">{tasks.length}</span>
       </header>
@@ -257,6 +260,7 @@ function columnTone(name = "") {
 
 function TaskCard({ task, onOpen }) {
   const t = useT();
+  const tx = useTx();
   const { locale } = useI18n();
   const labels = priorityLabels(t);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id });
@@ -267,8 +271,8 @@ function TaskCard({ task, onOpen }) {
     <article ref={setNodeRef} className="tcard" style={style} onClick={() => onOpen(task.id)}>
       <button className="handle" {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} aria-label="Drag">⠿</button>
       <div>
-        <h3>{task.title}</h3>
-        {task.project_name && <div className="project-label">{task.project_name}</div>}
+        <h3>{tx(task.title)}</h3>
+        {task.project_name && <div className="project-label">{tx(task.project_name)}</div>}
         <div className="meta">
           <span className={`pill ${task.priority}`}>{labels[task.priority] || priorityLabel[task.priority]}</span>
           {task.due_date && <span className={`pill ${dateClass}`}>{formatDate(task.due_date, locale)}</span>}
@@ -301,6 +305,7 @@ function NewColumn({ projectId }) {
 
 export function TimeView({ tick, onOpenTask }) {
   const t = useT();
+  const tx = useTx();
   const [running, setRunning] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
@@ -365,7 +370,7 @@ export function TimeView({ tick, onOpenTask }) {
           <label className="field">Projeto
             <select value={filters.project_id} onChange={(e) => setFilters({ ...filters, project_id: e.target.value })}>
               <option value="">Todos</option>
-              {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+              {projects.map((project) => <option key={project.id} value={project.id}>{tx(project.name)}</option>)}
             </select>
           </label>
         </section>
@@ -383,9 +388,9 @@ export function TimeView({ tick, onOpenTask }) {
                 <tr key={entry.id}>
                   <td>{formatDate(entry.work_date)}</td>
                   <td>{entry.user_name}</td>
-                  <td>{entry.project_name}</td>
-                  <td><button className="link" onClick={() => onOpenTask(entry.task_id)}>{entry.task_title}</button></td>
-                  <td>{hoursLabel(entry.minutes)}</td>
+                  <td>{tx(entry.project_name)}</td>
+                  <td><button className="link" onClick={() => onOpenTask(entry.task_id)}>{tx(entry.task_title)}</button></td>
+                  <td>{hoursLabel(entry.minutes, t)}</td>
                   <td>{entry.source}</td>
                 </tr>
               ))}
@@ -399,6 +404,7 @@ export function TimeView({ tick, onOpenTask }) {
 
 export function CrmView({ tick, onOpenProject }) {
   const t = useT();
+  const tx = useTx();
   const [tab, setTab] = useState("funil");
   const [board, setBoard] = useState(null);
   const [contacts, setContacts] = useState([]);
@@ -456,15 +462,15 @@ export function CrmView({ tick, onOpenProject }) {
       {deal && (
         <div className="drawer-back" onClick={() => setDeal(null)}>
           <aside className="drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="row" style={{ justifyContent: "space-between" }}><h2>{deal.title}</h2><button className="ghost" onClick={() => setDeal(null)}>Fechar</button></div>
-            <p>{money(deal.value_cents)} · {deal.company_name || "Sem empresa"}</p>
-            <p className="score">Chance de fechar: {deal.prediction.score}%. {deal.prediction.reason}</p>
-            <p className="muted">{deal.contact_name || "Sem contato"} · responsável {deal.owner_name}</p>
+            <div className="row" style={{ justifyContent: "space-between" }}><h2>{tx(deal.title)}</h2><button className="ghost" onClick={() => setDeal(null)}>{t("common.close")}</button></div>
+            <p>{money(deal.value_cents)} · {deal.company_name || t("crm.noCompany")}</p>
+            <p className="score">{deal.prediction.score}% · {tx(deal.prediction.reason)}</p>
+            <p className="muted">{deal.contact_name || t("crm.noContact")} · {t("crm.owner")} {deal.owner_name}</p>
             <div className="row" style={{ marginTop: 12 }}>
             <button className="primary" onClick={() => api(`/api/crm/deals/${deal.id}/win`, { method: "POST" }).then((result) => { setDeal(null); if (result.project_id) onOpenProject(result.project_id); })}>
-              {deal.project_id ? "Abrir projeto ligado" : "Ganho — abrir projeto"}
+              {deal.project_id ? t("crm.openLinked") : t("crm.win")}
             </button>
-              <button className="danger" onClick={() => api(`/api/crm/deals/${deal.id}/lose`, { method: "POST" }).then(() => setDeal(null))}>Perdido</button>
+              <button className="danger" onClick={() => api(`/api/crm/deals/${deal.id}/lose`, { method: "POST" }).then(() => setDeal(null))}>{t("crm.lost")}</button>
             </div>
           </aside>
         </div>
@@ -474,6 +480,8 @@ export function CrmView({ tick, onOpenProject }) {
 }
 
 function DealForm({ users, contacts, companies, stages }) {
+  const t = useT();
+  const tx = useTx();
   const [form, setForm] = useState({ title: "", value: "", stage_id: stages[0]?.id || "", contact_id: "", company_id: "", owner_id: "", expected_close: "" });
   const [error, setError] = useState("");
   useEffect(() => {
@@ -489,11 +497,11 @@ function DealForm({ users, contacts, companies, stages }) {
     }}>
       {error && <div className="alert">{error}</div>}
       <div className="field inline">
-        <label className="field">Negócio<input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></label>
-        <label className="field">Valor (R$)<input type="number" min="0" step="0.01" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} /></label>
+        <label className="field">{t("crm.newDeal")}<input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></label>
+        <label className="field">{t("crm.value")}<input type="number" min="0" step="0.01" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} /></label>
       </div>
       <div className="field inline">
-        <label className="field">Etapa<select value={form.stage_id} onChange={(e) => setForm({ ...form, stage_id: e.target.value })}>{stages.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}</select></label>
+        <label className="field">{t("crm.stage")}<select value={form.stage_id} onChange={(e) => setForm({ ...form, stage_id: e.target.value })}>{stages.map((stage) => <option key={stage.id} value={stage.id}>{tx(stage.name)}</option>)}</select></label>
         <label className="field">Previsão<input type="date" value={form.expected_close} onChange={(e) => setForm({ ...form, expected_close: e.target.value })} /></label>
       </div>
       <div className="field inline">
@@ -507,6 +515,7 @@ function DealForm({ users, contacts, companies, stages }) {
 }
 
 function StageColumn({ stage, onOpen }) {
+  const tx = useTx();
   const { setNodeRef, isOver } = useDroppable({ id: `stage:${stage.id}` });
   const total = stage.deals.reduce((sum, deal) => sum + deal.value_cents, 0);
   const tone = columnTone(stage.name) === "#00aec7" ? "#00bebe" : columnTone(stage.name);
@@ -515,7 +524,7 @@ function StageColumn({ stage, onOpen }) {
       <header>
         <span className="col-title" style={{ color: tone }}>
           <span className="col-dot" style={{ background: tone }} />
-          {stage.name}
+          {tx(stage.name)}
         </span>
         <span className="count">{money(total)}</span>
       </header>
@@ -525,16 +534,18 @@ function StageColumn({ stage, onOpen }) {
 }
 
 function DealCard({ deal, onOpen }) {
+  const t = useT();
+  const tx = useTx();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: deal.id });
   return (
     <article ref={setNodeRef} className="deal" style={{ transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.5 : 1 }} onClick={() => onOpen(deal)}>
-      <button className="handle" {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} aria-label="Arrastar">⠿</button>
+      <button className="handle" {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} aria-label="Drag">⠿</button>
       <div>
-        <strong>{deal.title}</strong>
-        <div className="muted">{deal.company_name || "Sem empresa"}</div>
+        <strong>{tx(deal.title)}</strong>
+        <div className="muted">{deal.company_name || t("crm.noCompany")}</div>
         <div className="meta">
           <span>{money(deal.value_cents)}</span>
-          <span className="score">{deal.prediction.score}% de chance</span>
+          <span className="score">{deal.prediction.score}%</span>
         </div>
       </div>
     </article>
@@ -590,21 +601,24 @@ function Companies({ companies }) {
 }
 
 function Activities({ activities }) {
+  const t = useT();
+  const tx = useTx();
+  const { locale } = useI18n();
   const [title, setTitle] = useState("");
   const [due, setDue] = useState(today());
   return (
     <div>
       <form className="composer" onSubmit={(e) => { e.preventDefault(); api("/api/crm/activities", { method: "POST", body: { title, due_at: due, type: "tarefa" } }).then(() => setTitle("")); }}>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Novo follow-up" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("crm.newFollow")} />
         <input type="date" value={due} onChange={(e) => setDue(e.target.value)} />
-        <button className="primary">Agendar</button>
+        <button className="primary">{t("common.add")}</button>
       </form>
       {activities.map((item) => (
         <label key={item.id} className="check">
           <input type="checkbox" checked={!!item.done} onChange={() => api(`/api/crm/activities/${item.id}/toggle`, { method: "POST" })} />
           <span>
-            <strong>{item.title}</strong>
-            <div className="muted">{item.type}{item.deal_title ? ` · ${item.deal_title}` : ""}{item.due_at ? ` · ${formatDate(item.due_at)}` : ""}{item.due_at && item.due_at < today() && !item.done ? " · atrasado" : ""}</div>
+            <strong>{tx(item.title)}</strong>
+            <div className="muted">{item.type}{item.deal_title ? ` · ${tx(item.deal_title)}` : ""}{item.due_at ? ` · ${formatDate(item.due_at, locale)}` : ""}{item.due_at && item.due_at < today() && !item.done ? ` · ${tx("atrasado")}` : ""}</div>
           </span>
         </label>
       ))}
@@ -613,29 +627,31 @@ function Activities({ activities }) {
 }
 
 function Reports({ reports }) {
+  const t = useT();
+  const tx = useTx();
   const max = Math.max(...reports.byStage.map((row) => row.value_cents), 1);
   return (
     <div className="split">
       <section className="panel">
-        <h2>Conversão</h2>
-        <p><b>{reports.conversion}%</b> dos negócios encerrados foram ganhos ({reports.won} ganhos, {reports.lost} perdidos).</p>
-        <p className="muted">Em aberto: {money(reports.openCents)}</p>
-        <h3 style={{ marginTop: 16 }}>Por etapa</h3>
+        <h2>{t("crm.reports")}</h2>
+        <p><b>{reports.conversion}%</b></p>
+        <p className="muted">{money(reports.openCents)}</p>
+        <h3 style={{ marginTop: 16 }}>{t("crm.stage")}</h3>
         {reports.byStage.map((row) => (
           <div key={row.name} style={{ marginTop: 8 }}>
-            <div className="row" style={{ justifyContent: "space-between" }}><span>{row.name}</span><span>{row.count} · {money(row.value_cents)}</span></div>
+            <div className="row" style={{ justifyContent: "space-between" }}><span>{tx(row.name)}</span><span>{row.count} · {money(row.value_cents)}</span></div>
             <div className="bar"><span style={{ width: `${(row.value_cents / max) * 100}%` }} /></div>
           </div>
         ))}
       </section>
       <section className="panel">
-        <h2>Por vendedor</h2>
+        <h2>{t("crm.seller")}</h2>
         <div className="table-scroll"><table className="table">
-          <thead><tr><th>Pessoa</th><th>Abertos</th><th>Ganhos</th><th>Valor ganho</th></tr></thead>
+          <thead><tr><th>{t("common.name")}</th><th>{t("common.open")}</th><th>{t("crm.win")}</th><th>{t("crm.value")}</th></tr></thead>
           <tbody>{reports.byOwner.map((row) => <tr key={row.name}><td>{row.name}</td><td>{row.open_count}</td><td>{row.won_count}</td><td>{money(row.won_cents)}</td></tr>)}</tbody>
         </table></div>
-        <h3 style={{ marginTop: 16 }}>Previsão de fechamento</h3>
-        {reports.predictions.map((item) => <p key={item.id} style={{ marginTop: 8 }}>{item.title}: {item.score}% · {item.reason}</p>)}
+        <h3 style={{ marginTop: 16 }}>{t("crm.reports")}</h3>
+        {reports.predictions.map((item) => <p key={item.id} style={{ marginTop: 8 }}>{tx(item.title)}: {item.score}% · {tx(item.reason)}</p>)}
       </section>
     </div>
   );
@@ -708,6 +724,7 @@ const COMMAND_EXAMPLES = [
 
 export function AiView({ gptKey, onOpenProject }) {
   const t = useT();
+  const tx = useTx();
   const [text, setText] = useState(COMMAND_EXAMPLES[0].text);
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState("");
@@ -827,21 +844,21 @@ export function AiView({ gptKey, onOpenProject }) {
               Projeto
               <select value={projectId} onChange={(e) => { setProjectId(e.target.value); setSummary(""); }}>
                 {projects.map((project) => (
-                  <option key={project.id} value={project.id}>{project.name}</option>
+                  <option key={project.id} value={project.id}>{tx(project.name)}</option>
                 ))}
               </select>
             </label>
             <div className="ai-summary-actions">
               <button className="primary" type="button" disabled={!projectId || summaryBusy} onClick={generateSummary}>
-                {summaryBusy ? "Gerando…" : "Gerar resumo"}
+                {summaryBusy ? t("ai.generating") : t("ai.summary")}
               </button>
               <button className="ghost" type="button" disabled={!projectId} onClick={() => onOpenProject(projectId)}>
-                Abrir projeto
+                {t("projects.title")}
               </button>
             </div>
             {summary ? (
               <div className="ai-summary-body">
-                <strong>{selectedProject?.name}</strong>
+                <strong>{tx(selectedProject?.name)}</strong>
                 <p>{summary}</p>
               </div>
             ) : (

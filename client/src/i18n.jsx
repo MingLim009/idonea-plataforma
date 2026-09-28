@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { translateContent } from "./contentI18n.js";
 
 const STORAGE_KEY = "idonea_lang";
 
@@ -706,8 +707,9 @@ export function I18nProvider({ children }) {
   const value = useMemo(() => {
     const table = dict[lang] || dict.pt;
     const t = (key, vars) => interpolate(table[key] ?? dict.pt[key] ?? key, vars);
+    const tx = (text) => translateContent(text, lang);
     const locale = LOCALES.find((item) => item.id === lang)?.locale || "pt-BR";
-    return { lang, setLang, t, locale, languages: LOCALES };
+    return { lang, setLang, t, tx, locale, languages: LOCALES };
   }, [lang]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
@@ -721,6 +723,11 @@ export function useI18n() {
 
 export function useT() {
   return useI18n().t;
+}
+
+/** Translate demo/seed content strings to the active language. */
+export function useTx() {
+  return useI18n().tx;
 }
 
 export function LanguageSwitcher({ className = "" }) {

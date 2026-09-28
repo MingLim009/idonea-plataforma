@@ -8,7 +8,6 @@ import { AiView, CrmView, Dashboard, ImportView, ProjectView, TeamView, TimeView
 import { TaskDrawer } from "./TaskDrawer.jsx";
 
 export default function App() {
-  const t = useT();
   const [user, setUser] = useState(null);
   const [gptKey, setGptKey] = useState("");
   const [booting, setBooting] = useState(true);

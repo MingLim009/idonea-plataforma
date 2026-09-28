@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { api, formatDate, getToken, hoursLabel, today } from "./api.js";
-import { priorityLabels, useI18n, useT } from "./i18n.jsx";
+import { priorityLabels, useI18n, useT, useTx } from "./i18n.jsx";
 
 export function TaskDrawer({ taskId, tick, onClose }) {
   const t = useT();
+  const tx = useTx();
   const { locale } = useI18n();
   const labels = priorityLabels(t);
   const [task, setTask] = useState(null);
@@ -37,13 +38,14 @@ export function TaskDrawer({ taskId, tick, onClose }) {
     <div className="drawer-back" onClick={onClose}>
       <aside className="drawer" onClick={(e) => e.stopPropagation()}>
         <div className="row" style={{ justifyContent: "space-between" }}>
-          <span className="muted">{task.project_name} · {task.section_name}</span>
+          <span className="muted">{tx(task.project_name)} · {tx(task.section_name)}</span>
           <button className="ghost" onClick={onClose}>{t("common.close")}</button>
         </div>
         {error && <div className="alert">{error}</div>}
-        <h2>
+        <h2>{tx(task.title)}</h2>
+        <label className="field">{t("projects.task")}
           <input value={task.title} onChange={(e) => setTask({ ...task, title: e.target.value })} onBlur={() => save({ title: task.title })} />
-        </h2>
+        </label>
         <div className="field inline">
           <label className="field">{t("common.priority")}
             <select value={task.priority} onChange={(e) => save({ priority: e.target.value })}>
@@ -82,7 +84,7 @@ export function TaskDrawer({ taskId, tick, onClose }) {
         {task.subtasks.map((item) => (
           <label key={item.id} className="subtask">
             <input type="checkbox" checked={item.status === "concluido"} onChange={() => api(`/api/tasks/${item.id}`, { method: "PATCH", body: { status: item.status === "concluido" ? "aberto" : "concluido" } }).then(load)} />
-            {item.title}
+            {tx(item.title)}
           </label>
         ))}
         <form className="composer" onSubmit={(e) => {
@@ -123,14 +125,14 @@ export function TaskDrawer({ taskId, tick, onClose }) {
         {task.timeEntries.map((entry) => (
           <div key={entry.id} className="comment">
             <strong>{hoursLabel(entry.minutes, t)}</strong> · {entry.user_name} · {formatDate(entry.work_date, locale)}
-            <div className="muted">{entry.note} · {entry.source}</div>
+            <div className="muted">{tx(entry.note)} · {entry.source}</div>
           </div>
         ))}
         <h3 style={{ marginTop: 16 }}>{t("drawer.comments")}</h3>
         {task.comments.map((item) => (
           <div key={item.id} className="comment">
             <strong>{item.user_name}</strong>
-            <div>{item.body}</div>
+            <div>{tx(item.body)}</div>
           </div>
         ))}
         <form className="composer" onSubmit={(e) => {
