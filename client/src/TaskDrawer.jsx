@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, formatDate, getToken, hoursLabel, today } from "./api.js";
 import { priorityLabels, localizeApiError, useI18n, useT, useTx } from "./i18n.jsx";
+import { Loader } from "./Loader.jsx";
 
 export function TaskDrawer({ taskId, tick, onClose }) {
   const t = useT();
@@ -29,11 +30,20 @@ export function TaskDrawer({ taskId, tick, onClose }) {
   }, [taskId, tick]);
 
   if (!task) {
-    return (
-      <div className="drawer-back" onClick={onClose}>
-        <aside className="drawer" onClick={(e) => e.stopPropagation()}>{error || t("common.loading")}</aside>
-      </div>
-    );
+    if (error) {
+      return (
+        <div className="drawer-back" onClick={onClose}>
+          <aside className="drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="row" style={{ justifyContent: "space-between" }}>
+              <span className="muted">{t("errors.taskNotFound")}</span>
+              <button className="ghost" onClick={onClose}>{t("common.close")}</button>
+            </div>
+            <div className="alert">{error}</div>
+          </aside>
+        </div>
+      );
+    }
+    return <Loader label={t("common.loading")} />;
   }
 
   function save(patch) {

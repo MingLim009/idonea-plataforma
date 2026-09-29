@@ -680,15 +680,11 @@ export function dashboard(user) {
     user.id,
     day(-6)
   ).minutes;
-  const openDeals = get(
-    "SELECT COALESCE(SUM(value_cents), 0) AS cents, COUNT(*) AS n FROM deals WHERE status = 'open'"
-  );
   return {
     projects,
     myTasks,
     overdue,
     hoursWeek,
-    openDeals,
     risks: risks(user).slice(0, 5),
     activity: all(
       `SELECT a.*, u.name AS user_name FROM activities a LEFT JOIN users u ON u.id = a.user_id

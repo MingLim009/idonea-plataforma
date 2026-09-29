@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DndContext, PointerSensor, closestCorners, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { api, formatDate, hoursLabel, money, priorityLabel, today } from "./api.js";
+import { api, formatDate, hoursLabel, priorityLabel, today } from "./api.js";
 import { priorityLabels, localizeApiError, useI18n, useT, useTx } from "./i18n.jsx";
 import { Loader } from "./Loader.jsx";
 
@@ -11,7 +11,7 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
   const { locale } = useI18n();
   const [data, setData] = useState(null);
   useEffect(() => { api("/api/dashboard").then(setData).catch(() => {}); }, [tick]);
-  if (!data) return <Loader />;
+  if (!data) return <Loader label={t("common.loading")} />;
   return (
     <div>
       <div className="page-head">
@@ -23,7 +23,6 @@ export function Dashboard({ tick, onOpenProject, onOpenTask }) {
       <div className="grid stats">
         <div className="stat"><span className="muted">{t("dash.overdue")}</span><b>{data.overdue}</b></div>
         <div className="stat"><span className="muted">{t("dash.hoursWeek")}</span><b>{hoursLabel(data.hoursWeek, t)}</b></div>
-        <div className="stat"><span className="muted">{t("dash.openDeals")}</span><b>{money(data.openDeals.cents, locale)}</b></div>
         <div className="stat"><span className="muted">{t("dash.projects")}</span><b>{data.projects.length}</b></div>
       </div>
       <div className="split">
@@ -70,8 +69,9 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
   const { locale } = useI18n();
   const labels = priorityLabels(t);
   const [projects, setProjects] = useState([]);
+  const [projectsReady, setProjectsReady] = useState(false);
   const [board, setBoard] = useState(null);
-  const [mode, setMode] = useState("quadro");
+  const [mode, setMode] = useState("lista");
   const [query, setQuery] = useState({ priority: "", assignee: "", status: "" });
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState({ name: "", description: "" });
@@ -83,21 +83,31 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
   useEffect(() => {
     let cancelled = false;
     api("/api/projects")
-      .then((list) => { if (!cancelled) setProjects(list); })
-      .catch((err) => { if (!cancelled) setError(localizeApiError(err.message, t)); });
+      .then((list) => {
+        if (cancelled) return;
+        setProjects(list);
+        setProjectsReady(true);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(localizeApiError(err.message, t));
+        setProjectsReady(true);
+      });
     return () => { cancelled = true; };
   }, [tick, t]);
 
   useEffect(() => {
+    if (!projectsReady) return;
     if (!projects.length) return;
     if (!projectId || !projects.some((project) => project.id === projectId)) {
       onOpenProject(projects[0].id);
     }
-  }, [projects, projectId, onOpenProject]);
+  }, [projects, projectsReady, projectId, onOpenProject]);
 
   useEffect(() => {
     if (!projectId) return undefined;
     let cancelled = false;
+    setBoard(null);
     setError("");
     api(`/api/projects/${projectId}/board`)
       .then((data) => {
@@ -113,6 +123,7 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
             const fresh = await api("/api/projects");
             if (cancelled) return;
             setProjects(fresh);
+            setProjectsReady(true);
             if (!fresh.some((project) => project.id === projectId)) {
               if (fresh[0]) onOpenProject(fresh[0].id);
               else {
@@ -157,9 +168,14 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
     }
   }
 
+  if (!projectsReady || (projectId && !board && !error) || (!projectId && projects.length > 0)) {
+    return <Loader label={t("common.loading")} />;
+  }
+
   if (!projectId) {
     return (
       <div>
+        {error && <div className="alert">{error}</div>}
         <h1>{t("projects.title")}</h1>
         <ProjectForm draft={draft} setDraft={setDraft} onCreate={async () => {
           const project = await api("/api/projects", { method: "POST", body: draft });
@@ -169,15 +185,16 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
       </div>
     );
   }
+
   if (!board) {
     return (
       <div>
         {error && <div className="alert">{error}</div>}
-        {projects.length > 0 ? (
+        {projects.length > 0 && (
           <div className="page-head">
             <div>
               <h1>{t("projects.title")}</h1>
-              {!error && <p className="muted">{t("common.loading")}</p>}
+              <p className="muted">{t("projects.notFound")}</p>
             </div>
             <div className="row">
               <select
@@ -192,8 +209,6 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
               </select>
             </div>
           </div>
-        ) : (
-          !error && <p>{t("common.loading")}</p>
         )}
       </div>
     );
@@ -238,12 +253,14 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
           <select className="project-select" value={projectId} onChange={(e) => onOpenProject(e.target.value)} aria-label={t("common.project")}>
             {projects.map((project) => <option key={project.id} value={project.id}>{tx(project.name)}</option>)}
           </select>
-          <button className={mode === "quadro" ? "primary" : "ghost"} onClick={() => setMode("quadro")}>{t("projects.board")}</button>
-          <button className={mode === "lista" ? "primary" : "ghost"} onClick={() => setMode("lista")}>{t("projects.list")}</button>
           <button className="ghost" onClick={() => setShowActivity((value) => !value)}>{t("projects.history")}</button>
           <button className="ghost" onClick={() => setCreating((value) => !value)}>{t("projects.new")}</button>
           <button type="button" className="danger" onClick={deleteProject}>{t("projects.delete")}</button>
         </div>
+      </div>
+      <div className="view-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={mode === "lista"} className={mode === "lista" ? "active" : ""} onClick={() => setMode("lista")}>{t("projects.list")}</button>
+        <button type="button" role="tab" aria-selected={mode === "quadro"} className={mode === "quadro" ? "active" : ""} onClick={() => setMode("quadro")}>{t("projects.board")}</button>
       </div>
       {error && <div className="alert">{error}</div>}
       {creating && <ProjectForm draft={draft} setDraft={setDraft} onCreate={async () => {
@@ -278,20 +295,40 @@ export function ProjectView({ projectId, tick, onOpenTask, onOpenProject }) {
           </div>
         </DndContext>
       ) : (
-        <div className="table-scroll"><table className="table">
-          <thead><tr><th>{t("projects.task")}</th><th>{t("common.assignee")}</th><th>{t("common.due")}</th><th>{t("common.priority")}</th><th>{t("projects.hours")}</th></tr></thead>
-          <tbody>
-            {tasks.map((task) => (
-              <tr key={task.id}>
-                <td><button className="link" onClick={() => onOpenTask(task.id)}>{tx(task.title)}</button><div className="muted">{tx(task.section_name)}</div></td>
-                <td>{task.assignee_name || "—"}</td>
-                <td className={task.due_date && task.due_date < today() && task.status !== "concluido" ? "pill late" : ""}>{formatDate(task.due_date, locale) || "—"}</td>
-                <td><span className={`pill ${task.priority}`}>{labels[task.priority] || priorityLabel[task.priority]}</span></td>
-                <td>{hoursLabel(task.minutes, t)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table></div>
+        <div className="asana-list">
+          <div className="asana-list-head">
+            <span />
+            <span>{t("projects.task")}</span>
+            <span>{t("common.assignee")}</span>
+            <span>{t("common.due")}</span>
+            <span>{t("common.priority")}</span>
+            <span>{t("projects.hours")}</span>
+          </div>
+          {tasks.map((task) => (
+            <button key={task.id} type="button" className="asana-list-row" onClick={() => onOpenTask(task.id)}>
+              <span
+                className={`tcard-check${task.status === "concluido" ? " done" : ""}`}
+                role="checkbox"
+                aria-checked={task.status === "concluido"}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  api(`/api/tasks/${task.id}`, {
+                    method: "PATCH",
+                    body: { status: task.status === "concluido" ? "aberto" : "concluido" },
+                  }).catch(() => {});
+                }}
+              />
+              <span>
+                <strong style={{ fontWeight: 500 }}>{tx(task.title)}</strong>
+                <div className="muted" style={{ fontSize: 12 }}>{tx(task.section_name)}</div>
+              </span>
+              <span>{task.assignee_name || "—"}</span>
+              <span className={task.due_date && task.due_date < today() && task.status !== "concluido" ? "pill late" : ""}>{formatDate(task.due_date, locale) || "—"}</span>
+              <span><span className={`pill ${task.priority}`}>{labels[task.priority] || priorityLabel[task.priority]}</span></span>
+              <span>{hoursLabel(task.minutes, t)}</span>
+            </button>
+          ))}
+        </div>
       )}
       {showActivity && (
         <section className="panel" style={{ marginTop: 14 }}>
@@ -367,9 +404,23 @@ function TaskCard({ task, onOpen }) {
   const dateClass = late ? "late" : task.status === "concluido" ? "date-ok" : "date-warn";
   return (
     <article ref={setNodeRef} className="tcard" style={style} onClick={() => onOpen(task.id)}>
-      <button className="handle" {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} aria-label="Drag">⠿</button>
+      <button
+        type="button"
+        className={`tcard-check${task.status === "concluido" ? " done" : ""}`}
+        aria-label={t("common.done")}
+        onClick={(e) => {
+          e.stopPropagation();
+          api(`/api/tasks/${task.id}`, {
+            method: "PATCH",
+            body: { status: task.status === "concluido" ? "aberto" : "concluido" },
+          }).catch(() => {});
+        }}
+      />
       <div>
-        <h3>{tx(task.title)}</h3>
+        <div className="row" style={{ justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+          <h3>{tx(task.title)}</h3>
+          <button className="handle" {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} aria-label="Drag">⠿</button>
+        </div>
         {task.project_name && <div className="project-label">{tx(task.project_name)}</div>}
         <div className="meta">
           <span className={`pill ${task.priority}`}>{labels[task.priority] || priorityLabel[task.priority]}</span>
@@ -496,267 +547,6 @@ export function TimeView({ tick, onOpenTask }) {
           </table></div>
         </>
       )}
-    </div>
-  );
-}
-
-export function CrmView({ tick, onOpenProject }) {
-  const t = useT();
-  const tx = useTx();
-  const [tab, setTab] = useState("funil");
-  const [board, setBoard] = useState(null);
-  const [contacts, setContacts] = useState([]);
-  const [companies, setCompanies] = useState([]);
-  const [activities, setActivities] = useState([]);
-  const [reports, setReports] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [deal, setDeal] = useState(null);
-  const [error, setError] = useState("");
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
-
-  function load() {
-    api("/api/crm/board").then(setBoard).catch((err) => setError(err.message));
-    api("/api/crm/contacts").then(setContacts);
-    api("/api/crm/companies").then(setCompanies);
-    api("/api/crm/activities").then(setActivities);
-    api("/api/crm/reports").then(setReports);
-    api("/api/users").then(setUsers);
-  }
-  useEffect(() => { load(); }, [tick]);
-
-  async function onDragEnd(event) {
-    const { active, over } = event;
-    if (!over) return;
-    const overId = String(over.id);
-    const stageId = overId.startsWith("stage:") ? overId.slice(6) : board.stages.find((stage) => stage.deals.some((item) => item.id === overId))?.id;
-    if (!stageId) return;
-    await api(`/api/crm/deals/${active.id}/move`, { method: "POST", body: { stage_id: stageId } });
-  }
-
-  return (
-    <div>
-      <div className="page-head"><div><h1>{t("crm.title")}</h1><p className="muted">{t("crm.funnel")}</p></div></div>
-      {error && <div className="alert">{error}</div>}
-      <div className="tabs">
-        {[["funil", t("crm.funnel")], ["contatos", t("crm.contacts")], ["empresas", t("crm.companies")], ["atividades", t("crm.activities")], ["relatorios", t("crm.reports")]].map(([id, label]) => (
-          <button key={id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>{label}</button>
-        ))}
-      </div>
-      {tab === "funil" && board && (
-        <>
-          <DealForm users={users} contacts={contacts} companies={companies} stages={board.stages} />
-          <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
-            <div className="board">
-              {board.stages.map((stage) => <StageColumn key={stage.id} stage={stage} onOpen={setDeal} />)}
-            </div>
-          </DndContext>
-          <StageEditor />
-        </>
-      )}
-      {tab === "contatos" && <Contacts companies={companies} contacts={contacts} />}
-      {tab === "empresas" && <Companies companies={companies} />}
-      {tab === "atividades" && <Activities activities={activities} />}
-      {tab === "relatorios" && reports && <Reports reports={reports} />}
-      {deal && (
-        <div className="drawer-back" onClick={() => setDeal(null)}>
-          <aside className="drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="row" style={{ justifyContent: "space-between" }}><h2>{tx(deal.title)}</h2><button className="ghost" onClick={() => setDeal(null)}>{t("common.close")}</button></div>
-            <p>{money(deal.value_cents)} · {deal.company_name || t("crm.noCompany")}</p>
-            <p className="score">{deal.prediction.score}% · {tx(deal.prediction.reason)}</p>
-            <p className="muted">{deal.contact_name || t("crm.noContact")} · {t("crm.owner")} {deal.owner_name}</p>
-            <div className="row" style={{ marginTop: 12 }}>
-            <button className="primary" onClick={() => api(`/api/crm/deals/${deal.id}/win`, { method: "POST" }).then((result) => { setDeal(null); if (result.project_id) onOpenProject(result.project_id); })}>
-              {deal.project_id ? t("crm.openLinked") : t("crm.win")}
-            </button>
-              <button className="danger" onClick={() => api(`/api/crm/deals/${deal.id}/lose`, { method: "POST" }).then(() => setDeal(null))}>{t("crm.lost")}</button>
-            </div>
-          </aside>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DealForm({ users, contacts, companies, stages }) {
-  const t = useT();
-  const tx = useTx();
-  const [form, setForm] = useState({ title: "", value: "", stage_id: stages[0]?.id || "", contact_id: "", company_id: "", owner_id: "", expected_close: "" });
-  const [error, setError] = useState("");
-  useEffect(() => {
-    if (!form.stage_id && stages[0]?.id) setForm((current) => ({ ...current, stage_id: stages[0].id }));
-  }, [stages, form.stage_id]);
-  return (
-    <form className="panel" style={{ marginBottom: 12 }} onSubmit={(e) => {
-      e.preventDefault();
-      setError("");
-      api("/api/crm/deals", { method: "POST", body: { ...form, value_cents: Math.round(Number(form.value || 0) * 100) } })
-        .then(() => setForm({ title: "", value: "", stage_id: stages[0]?.id || "", contact_id: "", company_id: "", owner_id: "", expected_close: "" }))
-        .catch((err) => setError(err.message));
-    }}>
-      {error && <div className="alert">{error}</div>}
-      <div className="field inline">
-        <label className="field">{t("crm.newDeal")}<input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></label>
-        <label className="field">{t("crm.value")}<input type="number" min="0" step="0.01" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} /></label>
-      </div>
-      <div className="field inline">
-        <label className="field">{t("crm.stage")}<select value={form.stage_id} onChange={(e) => setForm({ ...form, stage_id: e.target.value })}>{stages.map((stage) => <option key={stage.id} value={stage.id}>{tx(stage.name)}</option>)}</select></label>
-        <label className="field">{t("common.due")}<input type="date" value={form.expected_close} onChange={(e) => setForm({ ...form, expected_close: e.target.value })} /></label>
-      </div>
-      <div className="field inline">
-        <label className="field">{t("crm.company")}<select value={form.company_id} onChange={(e) => setForm({ ...form, company_id: e.target.value })}><option value="">—</option>{companies.map((company) => <option key={company.id} value={company.id}>{tx(company.name)}</option>)}</select></label>
-        <label className="field">{t("crm.contact")}<select value={form.contact_id} onChange={(e) => setForm({ ...form, contact_id: e.target.value })}><option value="">—</option>{contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.name}</option>)}</select></label>
-      </div>
-      <label className="field">{t("crm.seller")}<select value={form.owner_id} onChange={(e) => setForm({ ...form, owner_id: e.target.value })}><option value="">{t("crm.me")}</option>{users.map((person) => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>
-      <button className="primary">{t("crm.newDeal")}</button>
-    </form>
-  );
-}
-
-function StageColumn({ stage, onOpen }) {
-  const tx = useTx();
-  const { setNodeRef, isOver } = useDroppable({ id: `stage:${stage.id}` });
-  const total = stage.deals.reduce((sum, deal) => sum + deal.value_cents, 0);
-  const tone = columnTone(stage.name) === "#00aec7" ? "#00bebe" : columnTone(stage.name);
-  return (
-    <div className="column" ref={setNodeRef} style={{ outline: isOver ? "2px solid #00bebe" : "none" }}>
-      <header>
-        <span className="col-title" style={{ color: tone }}>
-          <span className="col-dot" style={{ background: tone }} />
-          {tx(stage.name)}
-        </span>
-        <span className="count">{money(total)}</span>
-      </header>
-      <div className="lane-cards">
-        {stage.deals.map((deal) => <DealCard key={deal.id} deal={deal} onOpen={onOpen} />)}
-      </div>
-    </div>
-  );
-}
-
-function DealCard({ deal, onOpen }) {
-  const t = useT();
-  const tx = useTx();
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: deal.id });
-  return (
-    <article ref={setNodeRef} className="deal" style={{ transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.5 : 1 }} onClick={() => onOpen(deal)}>
-      <button className="handle" {...listeners} {...attributes} onClick={(e) => e.stopPropagation()} aria-label="Drag">⠿</button>
-      <div>
-        <strong>{tx(deal.title)}</strong>
-        <div className="muted">{deal.company_name || t("crm.noCompany")}</div>
-        <div className="meta">
-          <span>{money(deal.value_cents)}</span>
-          <span className="score">{deal.prediction.score}%</span>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function StageEditor() {
-  const t = useT();
-  const [name, setName] = useState("");
-  return (
-    <form className="composer" style={{ marginTop: 12 }} onSubmit={(e) => { e.preventDefault(); api("/api/crm/stages", { method: "POST", body: { name } }).then(() => setName("")); }}>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("crm.newStage")} />
-      <button className="ghost">{t("common.add")}</button>
-    </form>
-  );
-}
-
-function Contacts({ contacts, companies }) {
-  const t = useT();
-  const tx = useTx();
-  const [form, setForm] = useState({ name: "", email: "", phone: "", company_id: "" });
-  return (
-    <div className="split">
-      <div className="table-scroll"><table className="table">
-        <thead><tr><th>{t("common.name")}</th><th>{t("crm.company")}</th><th>{t("team.email")}</th><th>{t("crm.contact")}</th></tr></thead>
-        <tbody>{contacts.map((contact) => <tr key={contact.id}><td>{contact.name}</td><td>{tx(contact.company_name) || "—"}</td><td>{contact.email}</td><td>{contact.phone}</td></tr>)}</tbody>
-      </table></div>
-      <form className="panel" onSubmit={(e) => { e.preventDefault(); api("/api/crm/contacts", { method: "POST", body: form }); setForm({ name: "", email: "", phone: "", company_id: "" }); }}>
-        <h2>{t("crm.contacts")}</h2>
-        <label className="field">{t("common.name")}<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
-        <label className="field">{t("team.email")}<input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
-        <label className="field">{t("crm.company")}<select value={form.company_id} onChange={(e) => setForm({ ...form, company_id: e.target.value })}><option value="">—</option>{companies.map((company) => <option key={company.id} value={company.id}>{tx(company.name)}</option>)}</select></label>
-        <button className="primary">{t("common.save")}</button>
-      </form>
-    </div>
-  );
-}
-
-function Companies({ companies }) {
-  const t = useT();
-  const tx = useTx();
-  const [form, setForm] = useState({ name: "", website: "" });
-  return (
-    <div className="split">
-      <div className="table-scroll"><table className="table">
-        <thead><tr><th>{t("crm.company")}</th><th>Web</th></tr></thead>
-        <tbody>{companies.map((company) => <tr key={company.id}><td>{tx(company.name)}</td><td>{company.website}</td></tr>)}</tbody>
-      </table></div>
-      <form className="panel" onSubmit={(e) => { e.preventDefault(); api("/api/crm/companies", { method: "POST", body: form }); setForm({ name: "", website: "" }); }}>
-        <h2>{t("crm.companies")}</h2>
-        <label className="field">{t("common.name")}<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></label>
-        <label className="field">Web<input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} /></label>
-        <button className="primary">{t("common.save")}</button>
-      </form>
-    </div>
-  );
-}
-
-function Activities({ activities }) {
-  const t = useT();
-  const tx = useTx();
-  const { locale } = useI18n();
-  const [title, setTitle] = useState("");
-  const [due, setDue] = useState(today());
-  return (
-    <div>
-      <form className="composer" onSubmit={(e) => { e.preventDefault(); api("/api/crm/activities", { method: "POST", body: { title, due_at: due, type: "tarefa" } }).then(() => setTitle("")); }}>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("crm.newFollow")} />
-        <input type="date" value={due} onChange={(e) => setDue(e.target.value)} />
-        <button className="primary">{t("common.add")}</button>
-      </form>
-      {activities.map((item) => (
-        <label key={item.id} className="check">
-          <input type="checkbox" checked={!!item.done} onChange={() => api(`/api/crm/activities/${item.id}/toggle`, { method: "POST" })} />
-          <span>
-            <strong>{tx(item.title)}</strong>
-            <div className="muted">{item.type}{item.deal_title ? ` · ${tx(item.deal_title)}` : ""}{item.due_at ? ` · ${formatDate(item.due_at, locale)}` : ""}{item.due_at && item.due_at < today() && !item.done ? ` · ${tx("atrasado")}` : ""}</div>
-          </span>
-        </label>
-      ))}
-    </div>
-  );
-}
-
-function Reports({ reports }) {
-  const t = useT();
-  const tx = useTx();
-  const max = Math.max(...reports.byStage.map((row) => row.value_cents), 1);
-  return (
-    <div className="split">
-      <section className="panel">
-        <h2>{t("crm.reports")}</h2>
-        <p><b>{reports.conversion}%</b></p>
-        <p className="muted">{money(reports.openCents)}</p>
-        <h3 style={{ marginTop: 16 }}>{t("crm.stage")}</h3>
-        {reports.byStage.map((row) => (
-          <div key={row.name} style={{ marginTop: 8 }}>
-            <div className="row" style={{ justifyContent: "space-between" }}><span>{tx(row.name)}</span><span>{row.count} · {money(row.value_cents)}</span></div>
-            <div className="bar"><span style={{ width: `${(row.value_cents / max) * 100}%` }} /></div>
-          </div>
-        ))}
-      </section>
-      <section className="panel">
-        <h2>{t("crm.seller")}</h2>
-        <div className="table-scroll"><table className="table">
-          <thead><tr><th>{t("common.name")}</th><th>{t("common.open")}</th><th>{t("crm.win")}</th><th>{t("crm.value")}</th></tr></thead>
-          <tbody>{reports.byOwner.map((row) => <tr key={row.name}><td>{row.name}</td><td>{row.open_count}</td><td>{row.won_count}</td><td>{money(row.won_cents)}</td></tr>)}</tbody>
-        </table></div>
-        <h3 style={{ marginTop: 16 }}>{t("crm.reports")}</h3>
-        {reports.predictions.map((item) => <p key={item.id} style={{ marginTop: 8 }}>{tx(item.title)}: {item.score}% · {tx(item.reason)}</p>)}
-      </section>
     </div>
   );
 }

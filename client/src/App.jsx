@@ -4,10 +4,11 @@ import { localizeApiError, useT } from "./i18n.jsx";
 import { Loader } from "./Loader.jsx";
 import { Shell } from "./Shell.jsx";
 import { LogoMark } from "./LogoMark.jsx";
-import { AiView, CrmView, Dashboard, ImportView, ProjectView, TeamView, TimeView } from "./views.jsx";
+import { AiView, Dashboard, ImportView, ProjectView, TeamView, TimeView } from "./views.jsx";
 import { TaskDrawer } from "./TaskDrawer.jsx";
 
 export default function App() {
+  const t = useT();
   const [user, setUser] = useState(null);
   const [gptKey, setGptKey] = useState("");
   const [booting, setBooting] = useState(true);
@@ -64,7 +65,7 @@ export default function App() {
     setPage("projeto");
   }, []);
 
-  if (booting) return <Loader />;
+  if (booting) return <Loader label={t("common.loading")} />;
   if (!user) return <Login onEnter={enter} />;
 
   return (
@@ -74,7 +75,6 @@ export default function App() {
         <ProjectView projectId={projectId} tick={tick} onOpenTask={setTaskId} onOpenProject={openProject} />
       )}
       {page === "tempo" && <TimeView tick={tick} onOpenTask={setTaskId} />}
-      {page === "crm" && <CrmView tick={tick} onOpenProject={openProject} />}
       {page === "importar" && <ImportView />}
       {page === "ia" && <AiView gptKey={gptKey} onOpenTask={setTaskId} onOpenProject={openProject} />}
       {page === "equipe" && <TeamView user={user} />}

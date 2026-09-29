@@ -7,7 +7,6 @@ const ICONS = {
   inicio: "fi-rr-home",
   projeto: "fi-rr-apps",
   tempo: "fi-rr-clock",
-  crm: "fi-rr-chart-line-up",
   importar: "fi-rr-cloud-download",
   ia: "fi-rr-magic-wand",
   equipe: "fi-rr-users",
@@ -17,7 +16,7 @@ const ICONS = {
   close: "fi-rr-cross",
 };
 
-const NAV_IDS = ["inicio", "projeto", "tempo", "crm", "importar", "ia", "equipe"];
+const NAV_IDS = ["inicio", "projeto", "tempo", "importar", "ia", "equipe"];
 
 export function Shell({ user, page, setPage, onLogout, onOpenTask, onOpenProject, tick, children }) {
   const t = useT();
