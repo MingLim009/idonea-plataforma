@@ -159,6 +159,7 @@ app.post("/api/users", auth, wrap((req, res) => {
 
 app.get("/api/dashboard", auth, wrap((req, res) => res.json(logic.dashboard(req.user))));
 app.get("/api/search", auth, wrap((req, res) => res.json(logic.searchTasks(req.user, req.query.q || ""))));
+app.get("/api/mentions", auth, wrap((req, res) => res.json(logic.searchMentions(req.user, req.query.q || ""))));
 
 app.get("/api/projects", auth, wrap((req, res) => res.json(logic.listProjects(req.user))));
 app.post("/api/projects", auth, wrap((req, res) => res.json(logic.createProject(req.user, req.body))));

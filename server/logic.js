@@ -1488,6 +1488,63 @@ export function searchTasks(user, q) {
   ).slice(0, 20);
 }
 
+/** Autocomplete for @mentions: people, projects, tasks. */
+export function searchMentions(user, q) {
+  const term = (q || "").trim().toLowerCase();
+  const projects = listProjects(user);
+  const projectIds = projects.map((project) => project.id);
+  const people = all("SELECT id, name, color, role FROM users ORDER BY name")
+    .filter((person) => !term || person.name.toLowerCase().includes(term))
+    .slice(0, 8)
+    .map((person) => ({
+      type: "user",
+      id: person.id,
+      label: person.name,
+      hint: person.role === "admin" ? "Pessoa · Administração" : "Pessoa · Equipe",
+      color: person.color,
+    }));
+
+  const projectHits = projects
+    .filter((project) => !term || project.name.toLowerCase().includes(term))
+    .slice(0, 6)
+    .map((project) => ({
+      type: "project",
+      id: project.id,
+      label: project.name,
+      hint: "Projeto",
+      color: project.color,
+    }));
+
+  let taskHits = [];
+  if (projectIds.length) {
+    const placeholders = projectIds.map(() => "?").join(",");
+    const rows = term
+      ? all(
+          `SELECT t.id, t.title, p.name AS project_name
+           FROM tasks t JOIN projects p ON p.id = t.project_id
+           WHERE t.parent_id IS NULL AND t.project_id IN (${placeholders}) AND t.title LIKE ?
+           ORDER BY t.created_at DESC LIMIT 8`,
+          ...projectIds,
+          `%${term}%`
+        )
+      : all(
+          `SELECT t.id, t.title, p.name AS project_name
+           FROM tasks t JOIN projects p ON p.id = t.project_id
+           WHERE t.parent_id IS NULL AND t.project_id IN (${placeholders})
+           ORDER BY t.created_at DESC LIMIT 8`,
+          ...projectIds
+        );
+    taskHits = rows.map((task) => ({
+      type: "task",
+      id: task.id,
+      label: task.title,
+      hint: `Tarefa · ${task.project_name}`,
+    }));
+  }
+
+  return [...people, ...projectHits, ...taskHits].slice(0, 18);
+}
+
 export function renameStage(user, id, name) {
   if (user.role !== "admin") throw httpError(403, "Só um administrador muda as etapas.");
   const clean = (name || "").trim();

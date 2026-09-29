@@ -78,7 +78,7 @@ export default function App() {
       {page === "importar" && <ImportView />}
       {page === "ia" && <AiView gptKey={gptKey} onOpenTask={setTaskId} onOpenProject={openProject} />}
       {page === "equipe" && <TeamView user={user} />}
-      {taskId && <TaskDrawer taskId={taskId} tick={tick} onClose={() => setTaskId(null)} />}
+      {taskId && <TaskDrawer taskId={taskId} tick={tick} onClose={() => setTaskId(null)} onOpenProject={openProject} />}
     </Shell>
   );
 }
